@@ -69,6 +69,11 @@ public class AuthController {
         SendVerificationResDto resDto = authService.sendVerificationCode(reqDto.getEmail());
         return Response.ok(resDto);
     }
+
+    @PostMapping("/verification-code/verify")
+    public void verifyVerificationCode(){
+
+    }
 }
 
 
