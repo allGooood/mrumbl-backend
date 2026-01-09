@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: mrumbl-backend
+
+  datasource:
+      # MySQL
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/mrumbl_db?&serverTimezone=Asia/Seoul
+      username: developer
+      password: R8$M!xP4
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000
+#    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: true
+
+        # 쿼리(SQL 문)를 예쁘게 포맷팅하여 보여준다.
+        format_sql: true
+
+        # SQL 문 이외의 추가적인 정보를 보여준다.
+        use_sql_comments: true
+
+        # 일대다의 관계에서 join fetch 는 데이터가 중복(뻥튀기)된다.
+        # 게다가 paging 을 할 수 없다.
+        # 이러한 경우 일대다의 관계에서 지연로딩을 사용하고..
+        # 다음과 같은 default_batch_fetch_size 를 적용하면..
+        # query 에 in 절을 사용하여 매우 효율적인 결과를 만들 수 있다.
+        # default_batch_fetch_size 는 in 절에 들어갈 원소의 개수이다.
+        # 일반적으로 100 ~ 1000 사이의 값을 권장한다.
+        default_batch_fetch_size: 100
+
+    # 영속성의 유지를 Controller 와 View 까지 가져갈 것인가? (읽기에 대해서만..)
+    open-in-view: false
+
+jwt:
+  secret: dmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAx
+  access_token_expiration: 3600000   # 1 hour (ms)
+  refresh_token_expiration: 1209600000 # 14 days (ms)
