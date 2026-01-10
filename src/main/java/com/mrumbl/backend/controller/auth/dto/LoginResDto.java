@@ -8,4 +8,5 @@ import lombok.Getter;
 public class LoginResDto {
     private String email;
     private String accessToken;
+    private int attemptLeft;
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static com.mrumbl.backend.service.AuthService.MAX_LOGIN_ATTEMPT;
+import static com.mrumbl.backend.service.auth.PasswordService.MAX_ATTEMPT;
 
 @Entity
 @Getter
@@ -50,7 +50,7 @@ public class Member extends BaseEntity {
     public Member updateFailedAttemptCount(){
         this.failedAttemptCount++;
 
-        if(failedAttemptCount >= MAX_LOGIN_ATTEMPT){
+        if(failedAttemptCount >= MAX_ATTEMPT){
             this.isLocked = true;
         }
         return this;

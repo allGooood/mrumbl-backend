@@ -4,8 +4,10 @@ import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtToken;
 import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.controller.auth.dto.*;
-import com.mrumbl.backend.service.AuthService;
+import com.mrumbl.backend.service.auth.AuthService;
 import com.mrumbl.backend.common.util.CookieManager;
+import com.mrumbl.backend.service.auth.dto.LoginResult;
+import com.mrumbl.backend.service.auth.dto.PasswordValidationResult;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +29,15 @@ public class AuthController {
     public Response<LoginResDto> login(@RequestBody LoginReqDto reqDto,
                                        HttpServletResponse response) {
 
-        JwtToken tokens = authService.login(reqDto);
+        LoginResult loginResult = authService.login(reqDto);
 
-        ResponseCookie cookie = cookieManager.createValidCookie(tokens.getRefreshToken());
+        ResponseCookie cookie = cookieManager.createValidCookie(loginResult.getRefreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return Response.ok(LoginResDto.builder()
-                        .accessToken(tokens.getAccessToken())
-                        .email(tokens.getEmail())
+                        .accessToken(loginResult.getAccessToken())
+                        .email(loginResult.getEmail())
+                        .attemptLeft(loginResult.getAttemptLeft())
                 .build());
     }
 
@@ -81,8 +84,13 @@ public class AuthController {
     @PostMapping("/password/verify")
     public Response<VerifyPasswordResDto> verifyPassword(@AuthenticationPrincipal JwtUser user,
                                                          @Valid @RequestBody VerifyPasswordReqDto reqDto){
-        VerifyPasswordResDto resDto = authService.verifyPassword(user, reqDto.getPassword());
-        return Response.ok(resDto);
+        PasswordValidationResult passwordValidationResult = authService.verifyPassword(user, reqDto.getPassword());
+
+        System.out.println("controler " + passwordValidationResult.getAttemptLeft());
+        return Response.ok(VerifyPasswordResDto.builder()
+                        .isVerified(passwordValidationResult.isValid())
+                        .attemptLeft(passwordValidationResult.getAttemptLeft())
+                .build());
     }
 }
 

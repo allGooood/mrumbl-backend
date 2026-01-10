@@ -1,6 +1,6 @@
 package com.mrumbl.backend.controller.test;
 
-import com.mrumbl.backend.service.MailService;
+import com.mrumbl.backend.service.external.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
