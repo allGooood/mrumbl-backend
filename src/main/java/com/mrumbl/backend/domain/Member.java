@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static com.mrumbl.backend.service.AuthService.MAX_LOGIN_ATTEMPT;
+
 @Entity
 @Getter
 @Builder
@@ -34,8 +36,30 @@ public class Member extends BaseEntity {
     private LocalDateTime joinedAt;
     private LocalDateTime lastLoginAt;
 
+    @Column(columnDefinition = "TINYINT UNSIGNED")
+    private Integer failedAttemptCount;
+
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean isLocked;
+
     public Member updateLastLoginAt(){
         this.lastLoginAt = LocalDateTime.now();
         return this;
     }
+
+    public Member updateFailedAttemptCount(){
+        this.failedAttemptCount++;
+
+        if(failedAttemptCount >= MAX_LOGIN_ATTEMPT){
+            this.isLocked = true;
+        }
+        return this;
+    }
+
+    public Member resetFailedAttempt(){
+        this.failedAttemptCount = 0;
+        this.isLocked = false;
+        return this;
+    }
+
 }

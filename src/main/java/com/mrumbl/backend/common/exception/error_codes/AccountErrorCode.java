@@ -13,7 +13,8 @@ public enum AccountErrorCode implements ErrorCode {
     ACCOUNT_DEACTIVATED(403, "ACC-004", "Account is deactivated."),
     ACCOUNT_WITHDRAWN(403, "ACC-005", "Account has been withdrawn."),
     INVALID_ADDRESS(400, "ACC-006", "Invalid address information."),
-    ADDRESS_NOT_CHANGED(409, "ACC-007", "Address cannot be updated with the same value.");
+    ADDRESS_NOT_CHANGED(409, "ACC-007", "Address cannot be updated with the same value."),
+    ACCOUNT_LOCKED(423, "ACC-008", "Account is locked.");
 
     private final int status;
     private final String code;

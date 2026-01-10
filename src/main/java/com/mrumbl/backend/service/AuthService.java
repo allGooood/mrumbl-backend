@@ -3,12 +3,10 @@ package com.mrumbl.backend.service;
 import com.mrumbl.backend.common.enumeration.MemberState;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
 import com.mrumbl.backend.common.jwt.JwtToken;
+import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.common.jwt.TokenManager;
 import com.mrumbl.backend.common.util.RandomManager;
-import com.mrumbl.backend.controller.auth.dto.LoginReqDto;
-import com.mrumbl.backend.controller.auth.dto.LogoutResDto;
-import com.mrumbl.backend.controller.auth.dto.SendVerificationReqDto;
-import com.mrumbl.backend.controller.auth.dto.SendVerificationResDto;
+import com.mrumbl.backend.controller.auth.dto.*;
 import com.mrumbl.backend.domain.Member;
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AuthErrorCode;
@@ -18,7 +16,7 @@ import com.mrumbl.backend.repository.MemberRepository;
 import com.mrumbl.backend.repository.redis.RedisTokenRepository;
 import com.mrumbl.backend.common.properties.JwtProperties;
 import com.mrumbl.backend.repository.redis.RedisVerificationCodeRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +29,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
+    public static final int MAX_LOGIN_ATTEMPT = 5;
+
     private final MemberRepository memberRepository;
     private final RedisTokenRepository redisTokenRepository;
     private final RedisVerificationCodeRepository redisVerificationCodeRepository;
@@ -42,6 +42,7 @@ public class AuthService {
     private final JwtProperties jwtProperties;
     private final RandomManager randomManager;
 
+    @Transactional
     public JwtToken login(LoginReqDto reqDto){
         Member memberFound = memberRepository.findByEmailAndState(reqDto.getEmail(), MemberState.ACTIVE)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
@@ -62,13 +63,11 @@ public class AuthService {
         return tokens;
     }
 
-    public LogoutResDto logout(String email){
+    public void logout(String email){
         redisTokenRepository.deleteById(email);
-        return LogoutResDto.builder()
-                .email(email)
-                .build();
     }
 
+    @Transactional(readOnly = true)
     public JwtToken reissue(String email, String refreshToken) {
 
         // 1. token 유효성 검증 (유효하지 않으면 BusinessException 발생)
@@ -118,6 +117,55 @@ public class AuthService {
                 .email(email)
                 .issuedAt(LocalDateTime.now())
                 .ttlSeconds(180)
+                .build();
+    }
+
+    // TODO - Test 필요 (계정 이의신청 중)
+    public VerifyCodeResDto verifyVerificationCode(String email, String verificationCode){
+
+        RedisVerificationCode codeFound = redisVerificationCodeRepository.findById(email)
+                .orElseThrow(() -> new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED));
+        if(!codeFound.getVerificationCode().equals(verificationCode)){
+            throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_MISMATCH);
+        }
+
+        redisVerificationCodeRepository.deleteById(email);
+
+        return VerifyCodeResDto.builder()
+                .email(email)
+                .verifiedAt(LocalDateTime.now())
+                .build();
+    }
+
+    @Transactional(noRollbackFor = BusinessException.class)
+    public VerifyPasswordResDto verifyPassword(JwtUser user, String password){
+        Member memberFound = memberRepository.findByEmailAndState(user.getEmail(), MemberState.ACTIVE)
+                .orElseThrow(() -> new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND));
+
+        if(memberFound.isLocked()){
+            throw new BusinessException(AccountErrorCode.ACCOUNT_LOCKED);
+        }
+
+        int attemptLeft = MAX_LOGIN_ATTEMPT;
+        if(!passwordEncoder.matches(password, memberFound.getPassword())){
+            memberRepository.save(memberFound.updateFailedAttemptCount());
+
+            attemptLeft = MAX_LOGIN_ATTEMPT - memberFound.getFailedAttemptCount();
+            if(attemptLeft == 0){
+                throw new BusinessException(AccountErrorCode.ACCOUNT_LOCKED);
+            }
+
+            return VerifyPasswordResDto.builder()
+                    .verified(false)
+                    .attemptLeft(attemptLeft)
+                    .build();
+        }
+
+        memberRepository.save(memberFound.resetFailedAttempt());
+
+        return VerifyPasswordResDto.builder()
+                .verified(true)
+                .attemptLeft(attemptLeft)
                 .build();
     }
 }

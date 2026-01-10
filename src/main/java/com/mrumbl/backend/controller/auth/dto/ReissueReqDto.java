@@ -1,10 +1,8 @@
 package com.mrumbl.backend.controller.auth.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class ReissueReqDto {
     private String email;
     private String refreshToken;

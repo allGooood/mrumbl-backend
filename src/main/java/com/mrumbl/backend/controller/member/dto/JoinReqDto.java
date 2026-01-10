@@ -1,9 +1,8 @@
 package com.mrumbl.backend.controller.member.dto;
 
-import lombok.*;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class JoinReqDto {
     private String email;
     private String password;
