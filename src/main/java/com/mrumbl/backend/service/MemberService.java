@@ -1,8 +1,9 @@
 package com.mrumbl.backend.service;
 
-import com.mrumbl.backend.controller.member.dto.JoinReqDto;
+import com.mrumbl.backend.common.exception.BusinessException;
+import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
 import com.mrumbl.backend.domain.Member;
-import com.mrumbl.backend.controller.member.dto.JoinResDto;
+import com.mrumbl.backend.controller.member.dto.SignUpResDto;
 import com.mrumbl.backend.common.enumeration.MemberState;
 import com.mrumbl.backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +18,21 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public JoinResDto join(JoinReqDto reqDto){
+    public SignUpResDto signUp(String email, String password, String name){
+
+        if(memberRepository.findByEmailAndState(email, MemberState.ACTIVE).isPresent()){
+            throw new BusinessException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
         Member member = Member.builder()
-                .email(reqDto.getEmail())
-                .name(reqDto.getName())
-                .password(passwordEncoder.encode(reqDto.getPassword()))
+                .email(email)
+                .name(name)
+                .password(passwordEncoder.encode(password))
                 .state(MemberState.ACTIVE)
                 .build();
+
         Member savedMember = memberRepository.save(member);
-        return JoinResDto.builder()
+        return SignUpResDto.builder()
                 .email(savedMember.getEmail())
                 .build();
     }

@@ -1,9 +1,10 @@
 package com.mrumbl.backend.controller.member;
 
 import com.mrumbl.backend.common.Response;
-import com.mrumbl.backend.controller.member.dto.JoinReqDto;
-import com.mrumbl.backend.controller.member.dto.JoinResDto;
+import com.mrumbl.backend.controller.member.dto.SignUpReqDto;
+import com.mrumbl.backend.controller.member.dto.SignUpResDto;
 import com.mrumbl.backend.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,8 +18,10 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping
-    public Response<JoinResDto> join(@RequestBody JoinReqDto reqDto){
-        JoinResDto resDto = memberService.join(reqDto);
+    public Response<SignUpResDto> signUp(@Valid @RequestBody SignUpReqDto reqDto){
+        SignUpResDto resDto = memberService.signUp(reqDto.getEmail(),
+                reqDto.getPassword(),
+                reqDto.getName());
         return Response.ok(resDto);
     }
 }

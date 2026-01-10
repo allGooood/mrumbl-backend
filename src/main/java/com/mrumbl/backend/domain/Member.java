@@ -33,10 +33,12 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private MemberState state;
 
+    @Column(insertable = false, updatable = false)
     private LocalDateTime joinedAt;
+
     private LocalDateTime lastLoginAt;
 
-    @Column(columnDefinition = "TINYINT UNSIGNED")
+    @Column(columnDefinition = "TINYINT UNSIGNED", insertable = false)
     private Integer failedAttemptCount;
 
     @Column(columnDefinition = "TINYINT(1)")

@@ -4,6 +4,6 @@ import lombok.*;
 
 @Builder
 @Getter
-public class JoinResDto {
+public class SignUpResDto {
     private String email;
 }

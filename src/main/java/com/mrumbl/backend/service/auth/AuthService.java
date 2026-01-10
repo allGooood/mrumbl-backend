@@ -48,13 +48,13 @@ public class AuthService {
         Member memberFound = memberRepository.findByEmailAndState(reqDto.getEmail(), MemberState.ACTIVE)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        PasswordValidationResult passwordValidationResult
+        PasswordValidationResult passwordValidation
                 = passwordService.validatePasswordAndHandleLock(memberFound, reqDto.getPassword());
 
         JwtToken tokens = null;
-        int attemptLeft = passwordValidationResult.getAttemptLeft();
+        int attemptLeft = passwordValidation.getAttemptLeft();
 
-        if(passwordValidationResult.isValid()){
+        if(passwordValidation.isValid()){
             tokens = tokenManager.createTokens(memberFound);
 
             redisTokenRepository.save(RedisToken.builder()
@@ -153,21 +153,9 @@ public class AuthService {
 
     @Transactional(noRollbackFor = BusinessException.class)
     public PasswordValidationResult verifyPassword(JwtUser user, String password){
+
         Member memberFound = memberRepository.findByEmailAndState(user.getEmail(), MemberState.ACTIVE)
                 .orElseThrow(() -> new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND));
-
-//        PasswordValidationResult passwordValidationResult = passwordService.validatePasswordAndHandleLock(memberFound, password);
-
-//        if(!passwordValidationResult.isValid()){
-//            return VerifyPasswordResDto.builder()
-//                    .isVerified(false)
-//                    .attemptLeft(passwordValidationResult.getAttemptLeft())
-//                    .build();
-//        }
-
-//        if(passwordValidationResult.isValid()){
-//            memberRepository.save(memberFound.resetFailedAttempt());
-//        }
 
         return passwordService.validatePasswordAndHandleLock(memberFound, password);
     }
