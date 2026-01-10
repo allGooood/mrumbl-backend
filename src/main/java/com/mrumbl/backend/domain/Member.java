@@ -44,6 +44,8 @@ public class Member extends BaseEntity {
     @Column(columnDefinition = "TINYINT(1)")
     private boolean isLocked;
 
+    private LocalDateTime passwordChangedAt;
+
     public Member updateLastLoginAt(){
         this.lastLoginAt = LocalDateTime.now();
         return this;
@@ -61,6 +63,14 @@ public class Member extends BaseEntity {
     public Member resetFailedAttempt(){
         this.failedAttemptCount = 0;
         this.isLocked = false;
+        return this;
+    }
+
+    public Member updatePassword(String password){
+        LocalDateTime now = LocalDateTime.now();
+        this.password = password;
+        this.updatedAt = now;
+        this.passwordChangedAt = now;
         return this;
     }
 

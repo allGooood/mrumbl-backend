@@ -1,15 +1,15 @@
 package com.mrumbl.backend.controller.member;
 
 import com.mrumbl.backend.common.Response;
+import com.mrumbl.backend.common.jwt.JwtUser;
+import com.mrumbl.backend.controller.member.dto.ChangePasswordReqDto;
 import com.mrumbl.backend.controller.member.dto.SignUpReqDto;
 import com.mrumbl.backend.controller.member.dto.SignUpResDto;
 import com.mrumbl.backend.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,4 +24,14 @@ public class MemberController {
                 reqDto.getName());
         return Response.ok(resDto);
     }
+
+    @PutMapping("/password")
+    public Response<Void> changePassword(@AuthenticationPrincipal JwtUser user,
+                                         @Valid @RequestBody ChangePasswordReqDto reqDto){
+
+        memberService.changePassword(user, reqDto.getPassword());
+
+        return Response.ok(null);
+    }
+
 }
