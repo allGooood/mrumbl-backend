@@ -55,4 +55,20 @@ public class MemberService {
         log.info("[changePassword] Password changed successfully. email={}", email);
     }
 
+    @Transactional
+    public void changeAddress(JwtUser user, String address, String addressDetail, String postcode){
+        Long memberId = user.getMemberId();
+
+        log.info("[changeAddress] 요청 memberId={}, address={}, postcode={}", memberId, address, postcode);
+
+        Member memberFound = memberRepository.findByIdAndState(memberId, MemberState.ACTIVE)
+                .orElseThrow(() -> {
+                    log.error("[changeAddress] Member not found or inactive. memberId={}", memberId);
+                    return new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND);
+                });
+
+        memberFound.changeAddress(address, addressDetail, postcode);
+        log.info("[changeAddress] 주소 변경 완료 memberId={}", memberId);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.mrumbl.backend.controller.member;
 
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtUser;
+import com.mrumbl.backend.controller.member.dto.ChangeAddressReqDto;
 import com.mrumbl.backend.controller.member.dto.ChangePasswordReqDto;
 import com.mrumbl.backend.controller.member.dto.SignUpReqDto;
 import com.mrumbl.backend.controller.member.dto.SignUpResDto;
@@ -28,9 +29,15 @@ public class MemberController {
     @PutMapping("/password")
     public Response<Void> changePassword(@AuthenticationPrincipal JwtUser user,
                                          @Valid @RequestBody ChangePasswordReqDto reqDto){
-
         memberService.changePassword(user, reqDto.getPassword());
 
+        return Response.ok(null);
+    }
+
+    @PutMapping
+    public Response<Void> changeAddress(@AuthenticationPrincipal JwtUser user,
+                                        @Valid @RequestBody ChangeAddressReqDto reqDto){
+        memberService.changeAddress(user, reqDto.getAddress(), reqDto.getAddressDetail(), reqDto.getPostcode());
         return Response.ok(null);
     }
 

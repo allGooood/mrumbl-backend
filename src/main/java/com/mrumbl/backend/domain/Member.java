@@ -69,9 +69,14 @@ public class Member extends BaseEntity {
     public Member updatePassword(String password){
         LocalDateTime now = LocalDateTime.now();
         this.password = password;
-        this.updatedAt = now;
         this.passwordChangedAt = now;
         return this;
     }
 
+    public Member changeAddress(String address, String addressDetail, String postcode){
+        this.address = address;
+        this.addressDetail = addressDetail;
+        this.postcode = postcode;
+        return this;
+    }
 }

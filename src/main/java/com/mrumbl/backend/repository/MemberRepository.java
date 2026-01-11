@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmailAndPassword(String email, String password);
     Optional<Member> findByEmailAndState(String email, MemberState state);
+    Optional<Member> findByIdAndState(Long memberId, MemberState state);
 
 //    @Query("select m from Member m where m.email = :email and m.state = 'ACTIVE'")
 //    Optional<Member> findActiveByEmail(@Param("email") String email);
