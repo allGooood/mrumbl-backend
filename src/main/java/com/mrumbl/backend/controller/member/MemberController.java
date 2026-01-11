@@ -2,10 +2,7 @@ package com.mrumbl.backend.controller.member;
 
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtUser;
-import com.mrumbl.backend.controller.member.dto.ChangeAddressReqDto;
-import com.mrumbl.backend.controller.member.dto.ChangePasswordReqDto;
-import com.mrumbl.backend.controller.member.dto.SignUpReqDto;
-import com.mrumbl.backend.controller.member.dto.SignUpResDto;
+import com.mrumbl.backend.controller.member.dto.*;
 import com.mrumbl.backend.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +35,13 @@ public class MemberController {
     public Response<Void> changeAddress(@AuthenticationPrincipal JwtUser user,
                                         @Valid @RequestBody ChangeAddressReqDto reqDto){
         memberService.changeAddress(user, reqDto.getAddress(), reqDto.getAddressDetail(), reqDto.getPostcode());
+
         return Response.ok(null);
+    }
+
+    @PostMapping("/availability")
+    public Response<CheckEmailAvailabilityResDto> checkEmailAvailability(@Valid @RequestBody CheckEmailAvailabilityReqDto reqDto){
+        return Response.ok(memberService.checkEmailAvailability(reqDto.getEmail()));
     }
 
 }
