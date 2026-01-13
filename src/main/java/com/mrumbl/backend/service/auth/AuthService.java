@@ -45,6 +45,9 @@ public class AuthService {
 
     @Transactional(noRollbackFor = BusinessException.class)
     public LoginResult login(LoginReqDto reqDto){
+
+        //TODO - 사용 중지 회원인 경우 에러 설정
+
         Member memberFound = memberRepository.findByEmailAndState(reqDto.getEmail(), MemberState.ACTIVE)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
