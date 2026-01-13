@@ -22,7 +22,10 @@ public class Store extends BaseEntity {
 
     private String storeName;
 
+    @Column(precision = 10, scale = 7)
     private BigDecimal xCoordinate;
+    
+    @Column(precision = 10, scale = 7)
     private BigDecimal yCoordinate;
 
     private String address;

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -75,6 +76,35 @@ public class StoreService {
                         .open(storeEntity.getOpenTime())
                         .close(storeEntity.getCloseTime())
                         .build())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public StoreListResponse getStoreNearby(BigDecimal x, BigDecimal y, Integer r){
+
+        List<Store> results = storeRepository.findNearbyStores(x, y, r);
+
+        List<StoreSummaryDto> stores = results.stream()
+                .map(store -> StoreSummaryDto.builder()
+                        .storeId(store.getId())
+                        .storeName(store.getStoreName())
+                        .storeAddress(StoreAddressDto.builder()
+                                .address(store.getAddress())
+                                .addressDetail(store.getAddressDetail())
+                                .postcode(store.getPostcode())
+                                .build())
+                        .isOpenNow(isOpenNow(store.getOpenTime(), store.getCloseTime()))
+                        .coordinates(store.getXCoordinate() != null && store.getYCoordinate() != null 
+                                ? CoordinateDto.builder()
+                                        .longitude(store.getXCoordinate())
+                                        .latitude(store.getYCoordinate())
+                                        .build()
+                                : null)
+                        .build())
+                .toList();
+
+        return StoreListResponse.builder()
+                .stores(stores)
                 .build();
     }
 }

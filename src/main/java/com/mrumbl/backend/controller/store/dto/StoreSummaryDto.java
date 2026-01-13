@@ -10,4 +10,5 @@ public class StoreSummaryDto {
     private String storeName;
     private StoreAddressDto storeAddress;
     private boolean isOpenNow;
+    private CoordinateDto coordinates;
 }
