@@ -64,7 +64,7 @@ public class MemberService {
 
         Member memberFound = memberRepository.findByIdAndState(memberId, MemberState.ACTIVE)
                 .orElseThrow(() -> {
-                    log.error("[changeAddress] Member not found or inactive. memberId={}", memberId);
+                    log.warn("[changeAddress] Member not found or inactive. memberId={}", memberId);
                     return new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND);
                 });
 
