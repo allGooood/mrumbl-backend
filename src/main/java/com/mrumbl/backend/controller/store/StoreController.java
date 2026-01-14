@@ -3,7 +3,7 @@ package com.mrumbl.backend.controller.store;
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.controller.store.dto.StoreListResponse;
 import com.mrumbl.backend.controller.store.dto.GetStoreResDto;
-import com.mrumbl.backend.service.StoreService;
+import com.mrumbl.backend.service.store.StoreService;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
