@@ -4,10 +4,14 @@ import com.mrumbl.backend.common.enumeration.ProductCategory;
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.ProductErrorCode;
 import com.mrumbl.backend.common.exception.error_codes.StoreErrorCode;
+import com.mrumbl.backend.common.util.PriceConverter;
+import com.mrumbl.backend.controller.product.dto.GetCookiesResDto;
 import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.domain.Product;
+import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.ProductStock;
+import com.mrumbl.backend.repository.ProductCookieRepository;
 import com.mrumbl.backend.repository.ProductStockRepository;
 import com.mrumbl.backend.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductStockRepository productStockRepository;
     private final StoreRepository storeRepository;
+    private final ProductCookieRepository productCookieRepository;
 
     @Transactional(readOnly = true)
     public List<GetStoreProductsResDto> getProducts(Long storeId){
@@ -98,5 +103,21 @@ public class ProductService {
                 .imageUrl(productFound.getImageUrl())
                 .discountRate(productFound.getDiscountRate())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetCookiesResDto> getCookies(){
+        log.info("[ProductService] getCookies request received");
+
+        return productCookieRepository.findAllByInUse(true)
+                .stream()
+                .map(cookie -> GetCookiesResDto.builder()
+                        .cookieId(cookie.getId())
+                        .cookieName(cookie.getCookieName())
+                        .imageUrl(cookie.getImageUrl())
+                        .cookieCalorie(cookie.getCookieCalorie())
+                        .additionalPrice(PriceConverter.centsToDollars(cookie.getAdditionalPrice()))
+                        .build())
+                .toList();
     }
 }

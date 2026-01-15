@@ -1,6 +1,7 @@
 package com.mrumbl.backend.controller.product;
 
 import com.mrumbl.backend.common.Response;
+import com.mrumbl.backend.controller.product.dto.GetCookiesResDto;
 import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.service.product.ProductService;
@@ -27,6 +28,11 @@ public class ProductController {
     public Response<GetProductDetailResDto> getProductDetail(@PathVariable @Positive(message = "Store ID must be positive") Long storeId,
                                                              @PathVariable @Positive(message = "Product ID must be positive") Long productId){
         return Response.ok(productService.getProductDetail(storeId, productId));
+    }
+
+    @GetMapping("/cookies")
+    public Response<List<GetCookiesResDto>> getCookies(){
+        return Response.ok(productService.getCookies());
     }
 
 }
