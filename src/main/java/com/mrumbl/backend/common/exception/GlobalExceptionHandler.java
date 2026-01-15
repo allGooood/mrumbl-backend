@@ -2,6 +2,7 @@ package com.mrumbl.backend.common.exception;
 
 import com.mrumbl.backend.common.exception.error_codes.CommonErrorCode;
 import com.mrumbl.backend.common.exception.error_codes.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -29,6 +31,8 @@ public class GlobalExceptionHandler {
     // Unspecified Exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e){
+        // 스택 트레이스 로깅
+        log.error("Unhandled exception occurred", e);
         return ResponseEntity
                 .status(500)
                 .body(ErrorResponse.builder()

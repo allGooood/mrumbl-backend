@@ -28,8 +28,6 @@ public class StoreController {
     @GetMapping
     public Response<StoreListResponse> searchStores(@NotBlank(message = "keyword must not be blank")
                                                         String keyword){
-        log.info("[StoreController] GET /api/stores invoked. keyword={}", keyword);
-
         keyword = keyword.trim();
         StoreListResponse response = storeService.searchStores(keyword);
         return Response.ok(response);
@@ -37,8 +35,6 @@ public class StoreController {
 
     @GetMapping("/{storeId}")
     public Response<GetStoreResDto> getStore(@PathVariable @Positive Long storeId){
-        log.info("[StoreController] GET /api/stores/{storeId} invoked. storeId={}", storeId);
-
         GetStoreResDto response = storeService.getStore(storeId);
         return Response.ok(response);
     }
@@ -47,8 +43,6 @@ public class StoreController {
     public Response<StoreListResponse> getStoreNearby(@RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") Double x,
                                                       @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") Double y,
                                                       @RequestParam @Positive Integer r){
-        log.info("[StoreController] GET /api/stores/nearby invoked. x={}, y={}, r={}", x, y, r);
-
         BigDecimal xCoordinate = BigDecimal.valueOf(x);
         BigDecimal yCoordinate = BigDecimal.valueOf(y);
         

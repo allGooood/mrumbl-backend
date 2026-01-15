@@ -28,7 +28,7 @@ public class AuthController {
     @PostMapping("/login/email")
     public Response<LoginResDto> login(@RequestBody LoginReqDto reqDto,
                                        HttpServletResponse response) {
-        log.info("[AuthController] POST /api/auth/login/email invoked. req={}", reqDto);
+//        log.info("[AuthController] POST /api/auth/login/email invoked. req={}", reqDto);
 
         LoginResult loginResult = authService.login(reqDto);
 
@@ -45,7 +45,7 @@ public class AuthController {
     @DeleteMapping("/logout")
     public Response<Void> logout(@RequestParam String email,
                                          HttpServletResponse response){
-        log.info("[AuthController] DELETE /api/auth/logout invoked. email={}", email);
+//        log.info("[AuthController] DELETE /api/auth/logout invoked. email={}", email);
 
         // 1. Service에서 Redis의 RefreshToken 삭제
         authService.logout(email);
@@ -60,7 +60,7 @@ public class AuthController {
     @PostMapping("/reissue")
     public Response<ReissueResDto> reissue(@RequestBody ReissueReqDto reqDto,
                                            HttpServletResponse response){
-        log.info("[AuthController] POST /api/auth/reissue invoked. req={}", reqDto);
+//        log.info("[AuthController] POST /api/auth/reissue invoked. req={}", reqDto);
 
         JwtToken tokens = authService.reissue(reqDto.getEmail(), reqDto.getRefreshToken());
 
@@ -75,7 +75,7 @@ public class AuthController {
 
     @PostMapping("/verification-code")
     public Response<SendVerificationResDto> sendVerificationCode(@Valid @RequestBody SendVerificationReqDto reqDto){
-        log.info("[AuthController] POST /api/auth/verification-code invoked. req={}", reqDto);
+//        log.info("[AuthController] POST /api/auth/verification-code invoked. req={}", reqDto);
 
         SendVerificationResDto resDto = authService.sendVerificationCode(reqDto.getEmail());
         return Response.ok(resDto);
@@ -83,7 +83,7 @@ public class AuthController {
 
     @PostMapping("/verification-code/verify")
     public Response<VerifyCodeResDto> verifyVerificationCode(@Valid @RequestBody VerifyCodeReqDto reqDto){
-        log.info("[AuthController] POST /api/auth/verification-code/verify invoked. req={}", reqDto);
+//        log.info("[AuthController] POST /api/auth/verification-code/verify invoked. req={}", reqDto);
 
         VerifyCodeResDto resDto = authService.verifyVerificationCode(reqDto.getEmail(), reqDto.getVerificationCode());
         return Response.ok(resDto);
@@ -92,7 +92,7 @@ public class AuthController {
     @PostMapping("/password/verify")
     public Response<VerifyPasswordResDto> verifyPassword(@AuthenticationPrincipal JwtUser user,
                                                          @Valid @RequestBody VerifyPasswordReqDto reqDto){
-        log.info("[AuthController] POST /api/auth/password/verify invoked. email={}, req={}", user.getEmail(), reqDto);
+//        log.info("[AuthController] POST /api/auth/password/verify invoked. email={}, req={}", user.getEmail(), reqDto);
 
         PasswordValidationResult passwordValidationResult = authService.verifyPassword(user, reqDto.getPassword());
         return Response.ok(VerifyPasswordResDto.builder()
