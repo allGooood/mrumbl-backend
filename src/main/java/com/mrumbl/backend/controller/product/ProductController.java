@@ -1,6 +1,7 @@
 package com.mrumbl.backend.controller.product;
 
 import com.mrumbl.backend.common.Response;
+import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.service.product.ProductService;
 import jakarta.validation.constraints.Positive;
@@ -21,4 +22,11 @@ public class ProductController {
     public Response<List<GetStoreProductsResDto>> getProducts(@PathVariable @Positive(message = "Store ID must be positive") Long storeId){
         return Response.ok(productService.getProducts(storeId));
     }
+
+    @GetMapping("/{storeId}/{productId}")
+    public Response<GetProductDetailResDto> getProductDetail(@PathVariable @Positive(message = "Store ID must be positive") Long storeId,
+                                                             @PathVariable @Positive(message = "Product ID must be positive") Long productId){
+        return Response.ok(productService.getProductDetail(storeId, productId));
+    }
+
 }

@@ -2,7 +2,9 @@ package com.mrumbl.backend.service.product;
 
 import com.mrumbl.backend.common.enumeration.ProductCategory;
 import com.mrumbl.backend.common.exception.BusinessException;
+import com.mrumbl.backend.common.exception.error_codes.ProductErrorCode;
 import com.mrumbl.backend.common.exception.error_codes.StoreErrorCode;
+import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
@@ -28,7 +30,6 @@ public class ProductService {
     public List<GetStoreProductsResDto> getProducts(Long storeId){
         log.info("[ProductService] getProducts request received. storeId={}", storeId);
 
-        // Store 존재 여부 확인
         if (!storeRepository.existsById(storeId)) {
             log.warn("[ProductService] Store not found. storeId={}", storeId);
             throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
@@ -69,5 +70,33 @@ public class ProductService {
                         .build())
                 .sorted(Comparator.comparing(GetStoreProductsResDto::getDisplayOrder))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public GetProductDetailResDto getProductDetail(Long storeId, Long productId){
+        log.info("[ProductService] getProductDetail request received. storeId={}, productId={}", storeId, productId);
+
+        if (!storeRepository.existsById(storeId)) {
+            log.warn("[ProductService] Store not found. storeId={}", storeId);
+            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
+        }
+
+        ProductStock stockFound = productStockRepository.getProductDetail(storeId, productId)
+                .orElseThrow(() -> {
+                    log.warn("[ProductService] Product not found in store. productId={}, storeId={}", productId, storeId);
+                    return new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
+                });
+
+        Product productFound = stockFound.getProduct();
+
+        return GetProductDetailResDto.builder()
+                .productId(productId)
+                .productName(productFound.getProductName())
+                .unitAmount(productFound.getUnitAmount())
+                .description(productFound.getDescription())
+                .stock(stockFound.getStockQuantity())
+                .imageUrl(productFound.getImageUrl())
+                .discountRate(productFound.getDiscountRate())
+                .build();
     }
 }
