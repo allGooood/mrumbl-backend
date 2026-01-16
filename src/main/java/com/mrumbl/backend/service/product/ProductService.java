@@ -35,10 +35,7 @@ public class ProductService {
     public List<GetStoreProductsResDto> getProducts(Long storeId){
         log.info("[ProductService] getProducts request received. storeId={}", storeId);
 
-        if (!storeRepository.existsById(storeId)) {
-            log.warn("[ProductService] Store not found. storeId={}", storeId);
-            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
-        }
+        validateStoreExists(storeId);
 
         List<ProductStock> stocks = productStockRepository.findByStoreIdWithStoreAndProduct(storeId);
         log.info("[ProductService] Found {} products for storeId={}", stocks.size(), storeId);
@@ -81,10 +78,7 @@ public class ProductService {
     public GetProductDetailResDto getProductDetail(Long storeId, Long productId){
         log.info("[ProductService] getProductDetail request received. storeId={}, productId={}", storeId, productId);
 
-        if (!storeRepository.existsById(storeId)) {
-            log.warn("[ProductService] Store not found. storeId={}", storeId);
-            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
-        }
+        validateStoreExists(storeId);
 
         ProductStock stockFound = productStockRepository.getProductDetail(storeId, productId)
                 .orElseThrow(() -> {
@@ -119,5 +113,12 @@ public class ProductService {
                         .additionalPrice(PriceConverter.centsToDollars(cookie.getAdditionalPrice()))
                         .build())
                 .toList();
+    }
+
+    private void validateStoreExists(Long storeId) {
+        if (!storeRepository.existsById(storeId)) {
+            log.warn("[ProductService] Store not found. storeId={}", storeId);
+            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
+        }
     }
 }

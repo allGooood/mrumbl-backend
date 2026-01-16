@@ -2,9 +2,11 @@ package com.mrumbl.backend.controller.test;
 
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.controller.test.dto.TestDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Hidden
 @Slf4j
 @RestController
 @RequestMapping("/test")

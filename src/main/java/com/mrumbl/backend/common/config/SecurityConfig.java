@@ -43,6 +43,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests((authorizeRequests) ->
                         authorizeRequests
+                                // Swagger UI 경로 허용
+//                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                                
                                 .requestMatchers(POST, "/auth/password/verify").authenticated()
                                 .requestMatchers(DELETE,"/auth/token").authenticated()
                                 .requestMatchers(POST, "/auth/refresh-token").authenticated()
