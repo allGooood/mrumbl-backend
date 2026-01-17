@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ProductCookieRepository extends JpaRepository<ProductCookie, Long> {
     List<ProductCookie> findAllByInUse(boolean inUse);
+    ProductCookie findByIdAndInUse(Long cookieId, boolean inUse);
 }
