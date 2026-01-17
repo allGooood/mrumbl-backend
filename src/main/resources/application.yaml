@@ -43,3 +43,4 @@ jwt:
   secret: dmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAx
   access_token_expiration: 3600000   # 1 hour (ms)
   refresh_token_expiration: 1209600000 # 14 days (ms)
+
