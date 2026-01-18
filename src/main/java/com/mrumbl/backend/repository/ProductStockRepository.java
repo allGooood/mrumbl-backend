@@ -1,6 +1,5 @@
 package com.mrumbl.backend.repository;
 
-import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

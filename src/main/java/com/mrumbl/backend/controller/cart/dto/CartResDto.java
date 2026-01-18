@@ -4,9 +4,10 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Builder
 public class CartResDto {
-    private List<String> cartIds;
+    private Set<String> cartIds;
 }

@@ -9,7 +9,6 @@ import com.mrumbl.backend.controller.product.dto.GetCookiesResDto;
 import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.domain.Product;
-import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.ProductStock;
 import com.mrumbl.backend.repository.ProductCookieRepository;
 import com.mrumbl.backend.repository.ProductStockRepository;
