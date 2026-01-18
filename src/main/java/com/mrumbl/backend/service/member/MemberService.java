@@ -1,4 +1,4 @@
-package com.mrumbl.backend.service;
+package com.mrumbl.backend.service.member;
 
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;

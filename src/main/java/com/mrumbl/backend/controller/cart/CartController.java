@@ -5,7 +5,8 @@ import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.controller.cart.dto.AddCartReqDto;
 import com.mrumbl.backend.controller.cart.dto.CartResDto;
 import com.mrumbl.backend.controller.cart.dto.GetCartResDto;
-import com.mrumbl.backend.service.CartService;
+import com.mrumbl.backend.controller.cart.dto.PutCartReqDto;
+import com.mrumbl.backend.service.cart.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,4 +31,11 @@ public class CartController {
     public Response<List<GetCartResDto>> getCarts(@AuthenticationPrincipal JwtUser user){
         return Response.ok(cartService.getCarts(user.getEmail()));
     }
+
+    @PutMapping
+    public Response<CartResDto> modifyCart(@AuthenticationPrincipal JwtUser user,
+                                           @Valid @RequestBody PutCartReqDto reqDto){
+        return Response.ok(cartService.putCart(user.getEmail(), reqDto));
+    }
+
 }

@@ -1,13 +1,9 @@
-package com.mrumbl.backend.service;
+package com.mrumbl.backend.service.cart;
 
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
 import com.mrumbl.backend.common.exception.error_codes.CartErrorCode;
-import com.mrumbl.backend.controller.cart.dto.AddCartReqDto;
-import com.mrumbl.backend.controller.cart.dto.CartResDto;
-import com.mrumbl.backend.controller.cart.dto.CookieOptionDto;
-import com.mrumbl.backend.controller.cart.dto.CookieOptionDetailDto;
-import com.mrumbl.backend.controller.cart.dto.GetCartResDto;
+import com.mrumbl.backend.controller.cart.dto.*;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.ProductStock;
@@ -19,6 +15,8 @@ import com.mrumbl.backend.repository.ProductRepository;
 import com.mrumbl.backend.repository.ProductStockRepository;
 import com.mrumbl.backend.repository.redis.RedisCartKeyRepository;
 import com.mrumbl.backend.repository.redis.RedisCartRepository;
+import com.mrumbl.backend.service.cart.validation.CartValidator;
+import com.mrumbl.backend.service.member.validation.MemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +37,9 @@ public class CartService {
     private final ProductRepository productRepository;
     private final ProductStockRepository productStockRepository;
     private final ProductCookieRepository productCookieRepository;
+
+    private final MemberValidator memberValidator;
+    private final CartValidator cartValidator;
 
     public CartResDto addCarts(String email, AddCartReqDto reqDto) {
         Integer quantity = reqDto.getQuantity();
@@ -113,6 +114,42 @@ public class CartService {
         return cartsFound.stream()
                 .map(cart -> convertToGetCartResDto(cart))
                 .toList();
+    }
+
+    public CartResDto putCart(String email, PutCartReqDto reqDto) {
+        log.info("Updating cart. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), reqDto.getQuantity());
+
+        Integer quantity = reqDto.getQuantity();
+        String cartId = reqDto.getCartId();
+
+        // Validation
+        cartValidator.checkQuantityValidation(quantity);
+        memberValidator.checkExistingMember(email);
+        RedisCart cartFound = cartValidator.checkAndReturnExistingCart(cartId);
+
+        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
+        Set<String> cartIds = cartKeyFound.getCartIds();
+        if (cartIds == null || !cartIds.contains(reqDto.getCartId())) {
+            log.warn("Cart ownership validation failed. email={}, cartId={}", email, reqDto.getCartId());
+            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        // 카트 업데이트
+        RedisCart updatedCart = RedisCart.builder()
+                .cartId(reqDto.getCartId())
+                .productId(cartFound.getProductId())
+                .storeId(cartFound.getStoreId())
+                .quantity(quantity)
+                .options(convertToCookieOptions(reqDto.getOptions()))
+                .build();
+
+        redisCartRepository.save(updatedCart);
+
+        log.info("Cart updated successfully. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), quantity);
+
+        return CartResDto.builder()
+                .cartIds(Collections.singletonList(reqDto.getCartId()))
+                .build();
     }
 
     private GetCartResDto convertToGetCartResDto(RedisCart cart) {

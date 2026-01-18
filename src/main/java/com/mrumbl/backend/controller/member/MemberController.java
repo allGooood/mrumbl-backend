@@ -3,7 +3,7 @@ package com.mrumbl.backend.controller.member;
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.controller.member.dto.*;
-import com.mrumbl.backend.service.MemberService;
+import com.mrumbl.backend.service.member.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
