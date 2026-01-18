@@ -23,6 +23,7 @@ public class CartValidator {
         }
     }
 
+    // TODO - return -> throw
     public RedisCart checkAndReturnExistingCart(String cartId){
         return redisCartRepository.findById(cartId)
                 .orElseThrow(() -> {

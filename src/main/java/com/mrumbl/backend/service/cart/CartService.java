@@ -152,6 +152,54 @@ public class CartService {
                 .build();
     }
 
+    public CartResDto deleteCarts(String email, DeleteCartReqDto reqDto){
+        log.info("Deleting cart. email={}, cartIds={}", email, reqDto.getCartIds());
+
+        memberValidator.checkExistingMember(email);
+
+        // 모든 요청 카트의 소유주 체크
+        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
+        Set<String> cartIdsFound = cartKeyFound.getCartIds();
+        if(!cartIdsFound.containsAll(reqDto.getCartIds())){
+            log.warn("Cart ownership validation failed.");
+            throw new BusinessException(CartErrorCode.CART_NOT_FOUND);
+        }
+
+        // 모든 요청 카트가 실제로 존재하는지 체크
+        Iterable<RedisCart> cartsIterable = redisCartRepository.findAllById(reqDto.getCartIds()); // TODO - 매개변수 List용 추가
+        List<RedisCart> cartsFound = new ArrayList<>();
+        cartsIterable.forEach(cartsFound::add);
+        if(cartsFound.size() != reqDto.getCartIds().size()){
+            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        redisCartRepository.deleteAllById(reqDto.getCartIds());
+
+        cartIdsFound.removeAll(reqDto.getCartIds());
+        redisCartKeyRepository.save(cartKeyFound);
+
+        log.info("Cart deleted successfully. email={}, cartIds={}", email, reqDto.getCartIds());
+
+        return CartResDto.builder()
+                .cartIds(reqDto.getCartIds())
+                .build();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private GetCartResDto convertToGetCartResDto(RedisCart cart) {
         // isSoldOut
         Product product = productRepository.findByIdAndInUse(cart.getProductId(), true)
