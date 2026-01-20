@@ -42,8 +42,10 @@ public class Order extends BaseEntity {
     private Integer productAmount;
     private Integer taxAmount;
     private LocalDateTime orderedAt;
+    private String customerRequest;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
+
 
 }

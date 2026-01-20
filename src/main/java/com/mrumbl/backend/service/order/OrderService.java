@@ -2,9 +2,9 @@ package com.mrumbl.backend.service.order;
 
 import com.mrumbl.backend.common.enumeration.OrderState;
 import com.mrumbl.backend.common.enumeration.PaymentMethod;
-import com.mrumbl.backend.controller.order.dto.AddOrderReqDto;
-import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
-import com.mrumbl.backend.controller.order.dto.OrderResDto;
+import com.mrumbl.backend.common.exception.BusinessException;
+import com.mrumbl.backend.common.exception.error_codes.OrderErrorCode;
+import com.mrumbl.backend.controller.order.dto.*;
 import com.mrumbl.backend.domain.Member;
 import com.mrumbl.backend.domain.Order;
 import com.mrumbl.backend.domain.OrderItem;
@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static com.mrumbl.backend.service.order.mapper.OrderMapper.toGetOrderDetailResDto;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -46,11 +48,11 @@ public class OrderService {
     @Transactional
     public OrderResDto addOrder(String email, AddOrderReqDto reqDto) {
         log.info("Creating order. email={}, storeId={}, productCount={}",
-                email, reqDto.getStoreId(), reqDto.getProducts() != null ? reqDto.getProducts().size() : 0);
+                email, reqDto.getStoreId(), reqDto.getItems() != null ? reqDto.getItems().size() : 0);
 
         Member memberFound = memberValidator.checkAndReturnExistingMember(email);
         Store storeFound = storeValidator.checkAndReturnStore(reqDto.getStoreId());
-        List<Product> productsFound = findAllByProductIds(reqDto.getProducts());
+        List<Product> productsFound = findAllByProductIds(reqDto.getItems());
 
         String orderNo = createOrderNumber();
         PaymentMethod paymentMethod = PaymentMethod.from(reqDto.getPaymentMethod());
@@ -60,7 +62,7 @@ public class OrderService {
         Order savedOrder = orderRepository.save(orderEntity);
 
         // OrderItem 저장
-        List<OrderItem> orderItemsEntity = createOrderItems(savedOrder, reqDto.getProducts(), productsFound);
+        List<OrderItem> orderItemsEntity = createOrderItems(savedOrder, reqDto.getItems(), productsFound);
         orderItemRepository.saveAll(orderItemsEntity);
 
         // Cart 삭제
@@ -100,12 +102,28 @@ public class OrderService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public GetOrderDetailResDto getOrderDetail(String email, Long orderId){
+        log.info("Getting order detail. email={}, orderId={}", email, orderId);
+
+        Order orderFound = orderRepository.findOrderAndItemsByOrderIdAndEmail(orderId, email)
+                .orElseThrow(() -> {
+                    log.warn("Order not found. email={}, orderId={}", email, orderId);
+                    return new BusinessException(OrderErrorCode.ORDER_NOT_FOUND);
+                });
+
+        GetOrderDetailResDto response = toGetOrderDetailResDto(orderFound);
+
+        log.info("Order detail built. email={}, orderId={}", email, orderId);
+        return response;
+    }
 
 
 
-    private List<Product> findAllByProductIds(List<AddOrderReqDto.OrderProductDto> productDtos) {
-        var productIds = productDtos.stream()
-                .map(AddOrderReqDto.OrderProductDto::getProductId)
+
+    private List<Product> findAllByProductIds(List<OrderItemDto> itemDtos) {
+        var productIds = itemDtos.stream()
+                .map(OrderItemDto::getProductId)
                 .toList();
         return productRepository.findAllByIdInAndInUse(productIds, true);
     }
@@ -132,12 +150,12 @@ public class OrderService {
     }
 
     private List<OrderItem> createOrderItems(Order order, 
-                                            List<AddOrderReqDto.OrderProductDto> productDtos,
+                                            List<OrderItemDto> productDtos,
                                             List<Product> products) {
         List<OrderItem> orderItems = new ArrayList<>();
         
         for (int i = 0; i < productDtos.size(); i++) {
-            AddOrderReqDto.OrderProductDto productDto = productDtos.get(i);
+            OrderItemDto productDto = productDtos.get(i);
             Product product = products.get(i);
             
             OrderItem orderItem = OrderItem.builder()

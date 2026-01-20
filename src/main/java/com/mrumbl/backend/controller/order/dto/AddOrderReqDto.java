@@ -13,7 +13,7 @@ import java.util.Set;
 public class AddOrderReqDto {
     @NotEmpty(message = "products must not be empty")
     @Valid
-    private List<OrderProductDto> products;
+    private List<OrderItemDto> items;
 
     private String customerRequest;
 
@@ -40,28 +40,4 @@ public class AddOrderReqDto {
 
     private Set<String> cartIds;
 
-    @Data
-    public static class OrderProductDto {
-        @NotNull(message = "productId must not be null")
-        @Positive(message = "productId must be positive")
-        private Long productId;
-
-        private String productName;
-
-        @NotNull(message = "quantity must not be null")
-        @Positive(message = "quantity must be positive")
-        private Integer quantity;
-
-        private String options;
-
-        @NotNull(message = "unitAmount must not be null")
-        @Positive(message = "unitAmount must be positive")
-        private Integer unitAmount;
-
-        @NotNull(message = "productAmount must not be null")
-        @Positive(message = "productAmount must be positive")
-        private Integer productAmount;
-
-        private String imageUrl;
-    }
 }

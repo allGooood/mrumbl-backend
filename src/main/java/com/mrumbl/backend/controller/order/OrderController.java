@@ -3,6 +3,7 @@ package com.mrumbl.backend.controller.order;
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.controller.order.dto.AddOrderReqDto;
+import com.mrumbl.backend.controller.order.dto.GetOrderDetailResDto;
 import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
 import com.mrumbl.backend.controller.order.dto.OrderResDto;
 import com.mrumbl.backend.service.order.OrderService;
@@ -30,5 +31,11 @@ public class OrderController {
     @GetMapping
     public Response<List<GetOrderResDto>> getOrders(@AuthenticationPrincipal JwtUser user) {
         return Response.ok(orderService.getOrders(user.getEmail()));
+    }
+
+    @GetMapping("/{orderId}")
+    public Response<GetOrderDetailResDto> getOrderDetail(@AuthenticationPrincipal JwtUser user,
+                                                         @PathVariable Long orderId){
+        return Response.ok(orderService.getOrderDetail(user.getEmail(), orderId));
     }
 }
