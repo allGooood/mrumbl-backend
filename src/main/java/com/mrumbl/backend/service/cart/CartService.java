@@ -5,14 +5,8 @@ import com.mrumbl.backend.common.exception.error_codes.CartErrorCode;
 import com.mrumbl.backend.controller.cart.dto.*;
 import com.mrumbl.backend.domain.redis.RedisCart;
 import com.mrumbl.backend.domain.redis.RedisCartKey;
-import com.mrumbl.backend.repository.MemberRepository;
-import com.mrumbl.backend.repository.ProductCookieRepository;
-import com.mrumbl.backend.repository.ProductRepository;
-import com.mrumbl.backend.repository.ProductStockRepository;
 import com.mrumbl.backend.repository.redis.cart.RedisCartKeyRepository;
-import com.mrumbl.backend.repository.redis.cart.RedisCartKeyRepositoryCustom;
 import com.mrumbl.backend.repository.redis.cart.RedisCartRepository;
-import com.mrumbl.backend.repository.redis.cart.RedisCartRepositoryCustom;
 import com.mrumbl.backend.service.cart.mapper.CartMapper;
 import com.mrumbl.backend.service.cart.mapper.CookieOptionMapper;
 import com.mrumbl.backend.service.cart.validation.CartValidator;
@@ -20,6 +14,7 @@ import com.mrumbl.backend.service.member.validation.MemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -31,12 +26,7 @@ import static com.mrumbl.backend.common.util.RandomManager.createCartKey;
 public class CartService {
     private final RedisCartKeyRepository redisCartKeyRepository;
     private final RedisCartRepository redisCartRepository;
-    private final RedisCartKeyRepositoryCustom redisCartKeyRepositoryCustom;
-    private final RedisCartRepositoryCustom redisCartRepositoryCustom;
-    private final MemberRepository memberRepository;
-    private final ProductRepository productRepository;
-    private final ProductStockRepository productStockRepository;
-    private final ProductCookieRepository productCookieRepository;
+//    private final RedisCartRepositoryCustom redisCartRepositoryCustom;
 
     private final MemberValidator memberValidator;
     private final CartValidator cartValidator;
@@ -49,7 +39,7 @@ public class CartService {
 
         memberValidator.checkExistingMember(email);
 
-        RedisCartKey cartKeyFound = redisCartKeyRepositoryCustom.findByEmailOrCreateEmpty(email);
+        RedisCartKey cartKeyFound = findCartKeyOrCreateEmpty(email);
         List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
 
         return cartsFound.stream()
@@ -93,10 +83,10 @@ public class CartService {
 
         cartValidator.checkQuantityValidation(quantity);
 
-        RedisCartKey cartKeyFound = redisCartKeyRepositoryCustom.findByEmailOrCreateEmpty(email);
+        RedisCartKey cartKeyFound = findCartKeyOrCreateEmpty(email);
 
         // 1. 기존 카트 있는지 조회
-        Optional<RedisCart> cartOptional = redisCartRepositoryCustom.findByStoreIdAndProductId(cartKeyFound.getCartIds(), reqDto.getStoreId(), reqDto.getProductId());
+        Optional<RedisCart> cartOptional = findByStoreIdAndProductId(cartKeyFound.getCartIds(), reqDto.getStoreId(), reqDto.getProductId());
 
         String cartId;
         Long productId;
@@ -147,25 +137,66 @@ public class CartService {
         // 1. Validation
         memberValidator.checkExistingMember(email);
 
-        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
-        Set<String> cartIdsFound = cartKeyFound.getCartIds();
-        cartValidator.checkCartOwnershipValidation(cartIdsFound, reqDto.getCartIds());
-
-        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(reqDto.getCartIds());
-        if(cartsFound.size() != reqDto.getCartIds().size()){
-            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
-        }
-
-        // 2. 카트 삭제 (RedisCart, RedisCartKey)
-        redisCartRepository.deleteAllById(reqDto.getCartIds());
-
-        cartIdsFound.removeAll(reqDto.getCartIds());
-        redisCartKeyRepository.save(cartKeyFound);
+        deleteCartAndCartKey(email, reqDto.getCartIds());
+//        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
+//        Set<String> cartIdsFound = cartKeyFound.getCartIds();
+//        cartValidator.checkCartOwnershipValidation(cartIdsFound, reqDto.getCartIds());
+//
+//        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(reqDto.getCartIds());
+//        if(cartsFound.size() != reqDto.getCartIds().size()){
+//            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
+//        }
+//
+//        // 2. 카트 삭제 (RedisCart, RedisCartKey)
+//        redisCartRepository.deleteAllById(reqDto.getCartIds());
+//
+//        cartIdsFound.removeAll(reqDto.getCartIds());
+//        redisCartKeyRepository.save(cartKeyFound);
 
         log.info("Cart deleted successfully. email={}, cartIds={}", email, reqDto.getCartIds());
 
         return CartResDto.builder()
                 .cartIds(reqDto.getCartIds())
                 .build();
+    }
+
+    public void deleteCartAndCartKey(String email, Set<String> cartIds){
+        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
+        Set<String> cartIdsFound = cartKeyFound.getCartIds();
+        cartValidator.checkCartOwnershipValidation(cartIdsFound, cartIds);
+
+        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartIds);
+        if(cartsFound.size() != cartIds.size()){
+            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
+        }
+
+        // 2. 카트 삭제 (RedisCart, RedisCartKey)
+        redisCartRepository.deleteAllById(cartIds);
+
+        cartIdsFound.removeAll(cartIds);
+        redisCartKeyRepository.save(cartKeyFound);
+    }
+
+    private RedisCartKey findCartKeyOrCreateEmpty(String email) {
+        return redisCartKeyRepository.findById(email)
+                .orElse(RedisCartKey.builder()
+                        .id(email)
+                        .cartIds(new HashSet<>())
+                        .build());
+    }
+
+    private Optional<RedisCart> findByStoreIdAndProductId(Set<String> cartIds, Long storeId, Long productId) {
+        if (CollectionUtils.isEmpty(cartIds)) {
+            return Optional.empty();
+        }
+
+        Iterable<RedisCart> cartsIterable = redisCartRepository.findAllById(cartIds);
+        List<RedisCart> carts = new ArrayList<>();
+        cartsIterable.forEach(carts::add);
+
+        return carts.stream()
+                .filter(cart -> cart.getStoreId().equals(storeId)
+                        && cart.getProductId().equals(productId))
+                .findFirst();
     }
 }
