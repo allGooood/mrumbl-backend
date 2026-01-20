@@ -134,24 +134,8 @@ public class CartService {
     public CartResDto deleteCarts(String email, DeleteCartReqDto reqDto){
         log.info("Deleting cart. email={}, cartIds={}", email, reqDto.getCartIds());
 
-        // 1. Validation
         memberValidator.checkExistingMember(email);
-
         deleteCartAndCartKey(email, reqDto.getCartIds());
-//        RedisCartKey cartKeyFound = cartValidator.checkAndReturnCartKey(email);
-//        Set<String> cartIdsFound = cartKeyFound.getCartIds();
-//        cartValidator.checkCartOwnershipValidation(cartIdsFound, reqDto.getCartIds());
-//
-//        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(reqDto.getCartIds());
-//        if(cartsFound.size() != reqDto.getCartIds().size()){
-//            throw new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND);
-//        }
-//
-//        // 2. 카트 삭제 (RedisCart, RedisCartKey)
-//        redisCartRepository.deleteAllById(reqDto.getCartIds());
-//
-//        cartIdsFound.removeAll(reqDto.getCartIds());
-//        redisCartKeyRepository.save(cartKeyFound);
 
         log.info("Cart deleted successfully. email={}, cartIds={}", email, reqDto.getCartIds());
 

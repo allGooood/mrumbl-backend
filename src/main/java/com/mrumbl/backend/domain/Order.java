@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,7 +33,7 @@ public class Order extends BaseEntity {
     private Store store;
 
     @Enumerated(EnumType.STRING)
-    private OrderState order_state;
+    private OrderState orderState;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -41,5 +42,8 @@ public class Order extends BaseEntity {
     private Integer productAmount;
     private Integer taxAmount;
     private LocalDateTime orderedAt;
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems;
 
 }

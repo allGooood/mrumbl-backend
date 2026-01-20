@@ -3,6 +3,7 @@ package com.mrumbl.backend.service.order;
 import com.mrumbl.backend.common.enumeration.OrderState;
 import com.mrumbl.backend.common.enumeration.PaymentMethod;
 import com.mrumbl.backend.controller.order.dto.AddOrderReqDto;
+import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
 import com.mrumbl.backend.controller.order.dto.OrderResDto;
 import com.mrumbl.backend.domain.Member;
 import com.mrumbl.backend.domain.Order;
@@ -12,10 +13,9 @@ import com.mrumbl.backend.domain.Store;
 import com.mrumbl.backend.repository.OrderItemRepository;
 import com.mrumbl.backend.repository.OrderRepository;
 import com.mrumbl.backend.repository.ProductRepository;
-import com.mrumbl.backend.repository.redis.cart.RedisCartKeyRepository;
-import com.mrumbl.backend.repository.redis.cart.RedisCartRepository;
 import com.mrumbl.backend.service.cart.CartService;
 import com.mrumbl.backend.service.member.validation.MemberValidator;
+import com.mrumbl.backend.service.order.mapper.OrderMapper;
 import com.mrumbl.backend.service.store.validation.StoreValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +78,31 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<GetOrderResDto> getOrders(String email) {
+        log.info("Getting orders. email={}", email);
+
+        memberValidator.checkExistingMember(email);
+
+        List<Order> ordersFound = orderRepository.findOrdersAndItemsByEmail(email);
+        log.info("Found {} orders for email={}", ordersFound.size(), email);
+
+        if (ordersFound.isEmpty()) {
+            log.info("No orders found for email={}", email);
+            return new ArrayList<>();
+        }
+
+        List<GetOrderResDto> response = ordersFound.stream()
+                .map(OrderMapper::toGetOrderResDto)
+                .toList();
+
+        log.info("Successfully retrieved {} orders for email={}", response.size(), email);
+        return response;
+    }
+
+
+
+
     private List<Product> findAllByProductIds(List<AddOrderReqDto.OrderProductDto> productDtos) {
         var productIds = productDtos.stream()
                 .map(AddOrderReqDto.OrderProductDto::getProductId)
@@ -97,7 +122,7 @@ public class OrderService {
                 .member(member) 
                 .store(store)
                 .orderNo(orderNo)
-                .order_state(OrderState.PAID)
+                .orderState(OrderState.PAID)
                 .paymentMethod(paymentMethod)
                 .productAmount(reqDto.getProductAmount())
                 .taxAmount(reqDto.getTaxAmount())
