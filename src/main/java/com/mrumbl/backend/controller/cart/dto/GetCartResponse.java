@@ -8,7 +8,7 @@ import java.util.List;
 
 @Builder
 @Getter
-public class GetCartResDto {
+public class GetCartResponse {
     private String cartId;
 
     private Long productId;
@@ -20,5 +20,5 @@ public class GetCartResDto {
     private Integer requiredItemCount;
 
     private Integer quantity;
-    private List<CookieOptionDetailDto> options;
+    private List<CookieOptionDetailResponse> options;
 }

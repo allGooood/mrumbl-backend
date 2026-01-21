@@ -1,6 +1,6 @@
 package com.mrumbl.backend.service.cart.mapper;
 
-import com.mrumbl.backend.controller.cart.dto.GetCartResDto;
+import com.mrumbl.backend.controller.cart.dto.GetCartResponse;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
 import com.mrumbl.backend.domain.redis.RedisCart;
@@ -19,7 +19,7 @@ public class CartMapper {
 
     private final CookieOptionMapper cookieOptionMapper;
 
-    public GetCartResDto toGetCartResDto(RedisCart cart){
+    public GetCartResponse toGetCartResponse(RedisCart cart){
         // isSoldOut
         Product product = productRepository.findByIdAndInUse(cart.getProductId(), true)
                 .orElse(null);
@@ -31,7 +31,7 @@ public class CartMapper {
         BigDecimal unitAmount = BigDecimal.valueOf(product.getUnitAmount());
         BigDecimal productAmount = unitAmount.multiply(BigDecimal.valueOf(cart.getQuantity()));
 
-        return GetCartResDto.builder()
+        return GetCartResponse.builder()
                 .cartId(cart.getCartId())
                 .productId(cart.getProductId())
                 .productName(product.getProductName())
@@ -41,7 +41,7 @@ public class CartMapper {
                 .isSoldOut(isSoldOut)
                 .requiredItemCount(product.getRequiredItemCount())
                 .quantity(cart.getQuantity())
-                .options(cookieOptionMapper.toCookieOptionDetailDto(cart.getOptions()))
+                .options(cookieOptionMapper.toCookieOptionDetailResponse(cart.getOptions()))
                 .build();
     }
 

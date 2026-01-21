@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AddCartReqDto {
+public class AddCartRequest {
     @NotNull(message = "productId must not be null")
     @Positive(message = "productId must be positive")
     private Long productId;
@@ -22,5 +22,5 @@ public class AddCartReqDto {
     private Integer quantity;
 
     @Valid
-    private List<CookieOptionDto> options;
+    private List<CookieOptionRequest> options;
 }

@@ -35,7 +35,7 @@ public class CartService {
     private final CookieOptionMapper cookieOptionMapper;
 
 
-    public List<GetCartResDto> getCarts(String email) {
+    public List<GetCartResponse> getCarts(String email) {
 
         memberValidator.checkExistingMember(email);
 
@@ -43,11 +43,11 @@ public class CartService {
         List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
 
         return cartsFound.stream()
-                .map(cartMapper::toGetCartResDto)
+                .map(cartMapper::toGetCartResponse)
                 .toList();
     }
 
-    public CartResDto putCart(String email, PutCartReqDto reqDto) {
+    public CartCommonResponse putCart(String email, PutCartRequest reqDto) {
         log.info("Updating cart. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), reqDto.getQuantity());
 
         Integer quantity = reqDto.getQuantity();
@@ -73,12 +73,12 @@ public class CartService {
 
         log.info("Cart updated successfully. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), quantity);
 
-        return CartResDto.builder()
+        return CartCommonResponse.builder()
                 .cartIds(Collections.singleton(reqDto.getCartId()))
                 .build();
     }
 
-    public CartResDto addCarts(String email, AddCartReqDto reqDto) {
+    public CartCommonResponse addCarts(String email, AddCartRequest reqDto) {
         Integer quantity = reqDto.getQuantity();
 
         cartValidator.checkQuantityValidation(quantity);
@@ -126,12 +126,12 @@ public class CartService {
 
         redisCartRepository.save(cartEntity);
 
-        return CartResDto.builder()
+        return CartCommonResponse.builder()
                 .cartIds(Collections.singleton(cartId))
                 .build();
     }
 
-    public CartResDto deleteCarts(String email, DeleteCartReqDto reqDto){
+    public CartCommonResponse deleteCarts(String email, DeleteCartRequest reqDto){
         log.info("Deleting cart. email={}, cartIds={}", email, reqDto.getCartIds());
 
         memberValidator.checkExistingMember(email);
@@ -139,7 +139,7 @@ public class CartService {
 
         log.info("Cart deleted successfully. email={}, cartIds={}", email, reqDto.getCartIds());
 
-        return CartResDto.builder()
+        return CartCommonResponse.builder()
                 .cartIds(reqDto.getCartIds())
                 .build();
     }

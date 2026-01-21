@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class CookieOptionDetailDto {
+public class CookieOptionDetailResponse {
     private Long cookieId;
     private String cookieName;
     private Integer quantity;

@@ -1,7 +1,7 @@
 package com.mrumbl.backend.service.cart.mapper;
 
-import com.mrumbl.backend.controller.cart.dto.CookieOptionDetailDto;
-import com.mrumbl.backend.controller.cart.dto.CookieOptionDto;
+import com.mrumbl.backend.controller.cart.dto.CookieOptionDetailResponse;
+import com.mrumbl.backend.controller.cart.dto.CookieOptionRequest;
 import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.redis.RedisCart;
 import com.mrumbl.backend.repository.product.ProductCookieRepository;
@@ -17,7 +17,7 @@ public class CookieOptionMapper {
     private final ProductCookieRepository productCookieRepository;
 
 
-    public List<RedisCart.CookieOption> toCookieOptions(List<CookieOptionDto> options) {
+    public List<RedisCart.CookieOption> toCookieOptions(List<CookieOptionRequest> options) {
         if (CollectionUtils.isEmpty(options)) {
             return null;
         }
@@ -30,7 +30,7 @@ public class CookieOptionMapper {
                 .toList();
     }
 
-    public List<CookieOptionDetailDto> toCookieOptionDetailDto(List<RedisCart.CookieOption> options) {
+    public List<CookieOptionDetailResponse> toCookieOptionDetailResponse(List<RedisCart.CookieOption> options) {
         if (CollectionUtils.isEmpty(options)) {
             return null;
         }
@@ -40,7 +40,7 @@ public class CookieOptionMapper {
                     ProductCookie cookieFound = productCookieRepository.findById(option.getCookieId())
                             .orElse(null);
 
-                    return CookieOptionDetailDto.builder()
+                    return CookieOptionDetailResponse.builder()
                             .cookieId(option.getCookieId())
                             .cookieName(cookieFound != null ? cookieFound.getCookieName() : null)
                             .quantity(option.getQuantity())

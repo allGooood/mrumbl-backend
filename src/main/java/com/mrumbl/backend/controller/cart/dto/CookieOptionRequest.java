@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class CookieOptionDto {
+public class CookieOptionRequest {
     @NotNull(message = "cookieId must not be null")
     @Positive(message = "cookieId must be positive")
     private Long cookieId;

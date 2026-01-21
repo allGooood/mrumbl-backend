@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PutCartReqDto {
+public class PutCartRequest {
     @NotBlank
     private String cartId;
 
@@ -16,5 +16,5 @@ public class PutCartReqDto {
     @NotNull
     private Integer quantity;
 
-    List<CookieOptionDto> options;
+    List<CookieOptionRequest> options;
 }
