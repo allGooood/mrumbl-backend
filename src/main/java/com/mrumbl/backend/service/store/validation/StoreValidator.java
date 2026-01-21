@@ -17,8 +17,19 @@ public class StoreValidator {
     public Store checkAndReturnStore(Long storeId){
         return storeRepository.findByIdAndIsActiveIsTrue(storeId)
                 .orElseThrow(() -> {
-                    log.warn("Store not found. storeId={}", storeId);
+                    storeNotFoundOrInactive(storeId);
                     return new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
                 });
+    }
+
+    public void checkExistingStore(Long storeId){
+        if (!storeRepository.existsByIdAndIsActiveIsTrue(storeId)) {
+            storeNotFoundOrInactive(storeId);
+            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
+        }
+    }
+
+    private void storeNotFoundOrInactive(Long storeId) {
+        log.warn("Store not found or Inactive. storeId={}", storeId);
     }
 }

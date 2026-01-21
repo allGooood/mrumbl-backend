@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Builder
-public class GetCookiesResDto {
+public class CookieProductsResponse {
     private Long cookieId;
     private String cookieName;
     private String imageUrl;

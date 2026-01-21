@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Builder
 @ToString
-public class GetStoreProductsResDto {
+public class StoreProductsResponse {
     private Long storeId;
     private String category;
     private Integer displayOrder;

@@ -23,7 +23,7 @@ public class CartMapper {
         // isSoldOut
         Product product = productRepository.findByIdAndInUse(cart.getProductId(), true)
                 .orElse(null);
-        ProductStock productStock = productStockRepository.findByStoreIdAndProductId(cart.getStoreId(), cart.getProductId())
+        ProductStock productStock = productStockRepository.findByStoreIdAndProductIdWithFetchJoin(cart.getStoreId(), cart.getProductId())
                 .orElse(null);
         Boolean isSoldOut = (product == null || productStock == null) ? true : productStock.getIsSoldOut();
 

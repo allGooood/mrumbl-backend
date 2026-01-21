@@ -1,18 +1,16 @@
 package com.mrumbl.backend.service.product;
 
 import com.mrumbl.backend.common.enumeration.ProductCategory;
-import com.mrumbl.backend.common.exception.BusinessException;
-import com.mrumbl.backend.common.exception.error_codes.ProductErrorCode;
-import com.mrumbl.backend.common.exception.error_codes.StoreErrorCode;
-import com.mrumbl.backend.common.util.PriceConverter;
-import com.mrumbl.backend.controller.product.dto.GetCookiesResDto;
-import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
-import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
+import com.mrumbl.backend.controller.product.dto.CookieProductsResponse;
+import com.mrumbl.backend.controller.product.dto.ProductDetailResponse;
+import com.mrumbl.backend.controller.product.dto.StoreProductsResponse;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
 import com.mrumbl.backend.repository.product.ProductCookieRepository;
 import com.mrumbl.backend.repository.product.ProductStockRepository;
-import com.mrumbl.backend.repository.store.StoreRepository;
+import com.mrumbl.backend.service.product.mapper.ProductMapper;
+import com.mrumbl.backend.service.product.validation.ProductValidator;
+import com.mrumbl.backend.service.store.validation.StoreValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,97 +25,71 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductStockRepository productStockRepository;
-    private final StoreRepository storeRepository;
     private final ProductCookieRepository productCookieRepository;
 
+    private final StoreValidator storeValidator;
+    private final ProductValidator productValidator;
+
+
     @Transactional(readOnly = true)
-    public List<GetStoreProductsResDto> getProducts(Long storeId){
-        log.info("[ProductService] getProducts request received. storeId={}", storeId);
+    public List<StoreProductsResponse> getProducts(Long storeId){
+        storeValidator.checkExistingStore(storeId);
 
-        validateStoreExists(storeId);
+        List<ProductStock> stocksFound = productStockRepository.findByStoreIdWithFetchJoin(storeId);
+        log.info("Found {} products for storeId={}", stocksFound.size(), storeId);
 
-        List<ProductStock> stocks = productStockRepository.findByStoreIdWithFetchJoin(storeId);
-        log.info("[ProductService] Found {} products for storeId={}", stocks.size(), storeId);
+        Map<ProductCategory, List<StoreProductsResponse.StoreProductDto>> productsByCategory
+                = groupProductsByCategory(stocksFound);
 
-        Map<ProductCategory, List<GetStoreProductsResDto.StoreProductDto>> map = stocks
+        return toStoreProductsResponse(storeId, productsByCategory);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDetailResponse getProductDetail(Long storeId, Long productId){
+        storeValidator.checkExistingStore(storeId);
+
+        ProductStock stockFound = productValidator.checkAndReturnProductStock(storeId, productId);
+        Product productFound = stockFound.getProduct();
+        log.info("Product found. storeId={}, productId={}, productName={}", 
+                storeId, productId, productFound.getProductName());
+
+        return ProductMapper.toProductDetailResponse(productFound, stockFound);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CookieProductsResponse> getCookies(){
+        List<CookieProductsResponse> cookiesFound = productCookieRepository.findAllByInUse(true)
                 .stream()
+                .map(ProductMapper::toCookieProductsResponse)
+                .toList();
+        log.info("Found {} cookies", cookiesFound.size());
+
+        return cookiesFound;
+    }
+
+    private Map<ProductCategory, List<StoreProductsResponse.StoreProductDto>> groupProductsByCategory(
+            List<ProductStock> stocks) {
+        return stocks.stream()
                 .collect(Collectors.groupingBy(
                         stock -> stock.getProduct().getProductCategory(),
                         Collectors.mapping(
-                                stock -> {
-                                    Product product = stock.getProduct();
-                                    return GetStoreProductsResDto.StoreProductDto.builder()
-                                            .productId(product.getId())
-                                            .productName(product.getProductName())
-                                            .unitAmount(product.getUnitAmount())
-                                            .discountRate(product.getDiscountRate())
-                                            .isSoldOut(stock.getIsSoldOut())
-                                            .productType(String.valueOf(product.getProductType()))
-                                            .imageUrl(product.getImageUrl())
-                                            .requiredItemCount(product.getRequiredItemCount())
-                                            .build();
-                                },
+                                stock -> ProductMapper.toStoreProductDto(stock.getProduct(), stock),
                                 Collectors.toList()
                         )
                 ));
+    }
 
-        return map.entrySet()
-                .stream()
-                .map(entry -> GetStoreProductsResDto.builder()
+    private List<StoreProductsResponse> toStoreProductsResponse(
+            Long storeId,
+            Map<ProductCategory, List<StoreProductsResponse.StoreProductDto>> productsByCategory) {
+        return productsByCategory.entrySet().stream()
+                .map(entry -> StoreProductsResponse.builder()
                         .storeId(storeId)
                         .category(entry.getKey().getCategoryName())
                         .displayOrder(entry.getKey().getDisplayOrder())
                         .products(entry.getValue())
                         .build())
-                .sorted(Comparator.comparing(GetStoreProductsResDto::getDisplayOrder))
+                .sorted(Comparator.comparing(StoreProductsResponse::getDisplayOrder))
                 .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public GetProductDetailResDto getProductDetail(Long storeId, Long productId){
-        log.info("[ProductService] getProductDetail request received. storeId={}, productId={}", storeId, productId);
-
-        validateStoreExists(storeId);
-
-        ProductStock stockFound = productStockRepository.findByStoreIdAndProductId(storeId, productId)
-                .orElseThrow(() -> {
-                    log.warn("[ProductService] Product not found in store. productId={}, storeId={}", productId, storeId);
-                    return new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);
-                });
-
-        Product productFound = stockFound.getProduct();
-
-        return GetProductDetailResDto.builder()
-                .productId(productId)
-                .productName(productFound.getProductName())
-                .unitAmount(productFound.getUnitAmount())
-                .description(productFound.getDescription())
-                .stock(stockFound.getStockQuantity())
-                .imageUrl(productFound.getImageUrl())
-                .discountRate(productFound.getDiscountRate())
-                .build();
-    }
-
-    @Transactional(readOnly = true)
-    public List<GetCookiesResDto> getCookies(){
-        log.info("[ProductService] getCookies request received");
-
-        return productCookieRepository.findAllByInUse(true)
-                .stream()
-                .map(cookie -> GetCookiesResDto.builder()
-                        .cookieId(cookie.getId())
-                        .cookieName(cookie.getCookieName())
-                        .imageUrl(cookie.getImageUrl())
-                        .cookieCalorie(cookie.getCookieCalorie())
-                        .additionalPrice(PriceConverter.centsToDollars(cookie.getAdditionalPrice()))
-                        .build())
-                .toList();
-    }
-
-    private void validateStoreExists(Long storeId) {
-        if (!storeRepository.existsById(storeId)) {
-            log.warn("[ProductService] Store not found. storeId={}", storeId);
-            throw new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
-        }
     }
 }

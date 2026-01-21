@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface ProductStockRepositoryCustom {
     List<ProductStock> findByStoreIdWithFetchJoin(Long storeId);
-    Optional<ProductStock> findByStoreIdAndProductId(Long storeId, Long productId);
+    Optional<ProductStock> findByStoreIdAndProductIdWithFetchJoin(Long storeId, Long productId);
 }

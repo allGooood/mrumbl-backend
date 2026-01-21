@@ -1,7 +1,7 @@
 package com.mrumbl.backend.service.product;
 
 import com.mrumbl.backend.common.enumeration.ProductCategory;
-import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
+import com.mrumbl.backend.controller.product.dto.StoreProductsResponse;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.repository.product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,8 +102,8 @@ class ProductServicePerformanceTest {
         System.out.println("========================================\n");
 
         // 결과 검증 (두 방법의 결과가 동일한지 확인)
-        List<GetStoreProductsResDto> forLoopResult = getProductsWithForLoop(testProducts);
-        List<GetStoreProductsResDto> streamResult = getProductsWithStream(testProducts);
+        List<StoreProductsResponse> forLoopResult = getProductsWithForLoop(testProducts);
+        List<StoreProductsResponse> streamResult = getProductsWithStream(testProducts);
         
         assertThat(forLoopResult.size()).isEqualTo(streamResult.size());
         // 추가 검증 로직 필요 시 작성
@@ -112,13 +112,13 @@ class ProductServicePerformanceTest {
     /**
      * for-loop 방식 (현재 구현)
      */
-    private List<GetStoreProductsResDto> getProductsWithForLoop(List<Product> products) {
-        Map<ProductCategory, List<GetStoreProductsResDto.StoreProductDto>> map = new java.util.HashMap<>();
+    private List<StoreProductsResponse> getProductsWithForLoop(List<Product> products) {
+        Map<ProductCategory, List<StoreProductsResponse.StoreProductDto>> map = new java.util.HashMap<>();
         
         for (Product product : products) {
             ProductCategory category = product.getProductCategory();
 
-            GetStoreProductsResDto.StoreProductDto dto = GetStoreProductsResDto.StoreProductDto.builder()
+            StoreProductsResponse.StoreProductDto dto = StoreProductsResponse.StoreProductDto.builder()
                     .productId(product.getId())
                     .productName(product.getProductName())
                     .unitAmount(product.getUnitAmount())
@@ -130,18 +130,18 @@ class ProductServicePerformanceTest {
                     .build();
 
             if (map.get(category) == null || map.get(category).isEmpty()) {
-                List<GetStoreProductsResDto.StoreProductDto> list = new ArrayList<>();
+                List<StoreProductsResponse.StoreProductDto> list = new ArrayList<>();
                 list.add(dto);
                 map.put(category, list);
             } else {
-                List<GetStoreProductsResDto.StoreProductDto> d = map.get(category);
+                List<StoreProductsResponse.StoreProductDto> d = map.get(category);
                 d.add(dto);
             }
         }
 
-        List<GetStoreProductsResDto> response = new ArrayList<>();
+        List<StoreProductsResponse> response = new ArrayList<>();
         for (ProductCategory key : map.keySet()) {
-            GetStoreProductsResDto resDto = GetStoreProductsResDto.builder()
+            StoreProductsResponse resDto = StoreProductsResponse.builder()
                     .category(key.getCategoryName())
                     .displayOrder(key.getDisplayOrder())
                     .products(map.get(key))
@@ -155,12 +155,12 @@ class ProductServicePerformanceTest {
     /**
      * Stream 방식 (비교 대상)
      */
-    private List<GetStoreProductsResDto> getProductsWithStream(List<Product> products) {
-        Map<ProductCategory, List<GetStoreProductsResDto.StoreProductDto>> map = products.stream()
+    private List<StoreProductsResponse> getProductsWithStream(List<Product> products) {
+        Map<ProductCategory, List<StoreProductsResponse.StoreProductDto>> map = products.stream()
                 .collect(Collectors.groupingBy(
                         Product::getProductCategory,
                         Collectors.mapping(
-                                product -> GetStoreProductsResDto.StoreProductDto.builder()
+                                product -> StoreProductsResponse.StoreProductDto.builder()
                                         .productId(product.getId())
                                         .productName(product.getProductName())
                                         .unitAmount(product.getUnitAmount())
@@ -175,7 +175,7 @@ class ProductServicePerformanceTest {
                 ));
 
         return map.entrySet().stream()
-                .map(entry -> GetStoreProductsResDto.builder()
+                .map(entry -> StoreProductsResponse.builder()
                         .category(entry.getKey().getCategoryName())
                         .displayOrder(entry.getKey().getDisplayOrder())
                         .products(entry.getValue())

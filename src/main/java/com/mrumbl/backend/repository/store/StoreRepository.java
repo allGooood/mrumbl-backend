@@ -22,6 +22,6 @@ public interface StoreRepository extends JpaRepository<Store, Long>, StoreReposi
 //    List<Store> findNearbyStores(BigDecimal x, BigDecimal y, Integer r);
 
     Optional<Store> findByIdAndIsActiveIsTrue(Long storeId);
-
+    boolean existsByIdAndIsActiveIsTrue(Long storeId);
 
 }

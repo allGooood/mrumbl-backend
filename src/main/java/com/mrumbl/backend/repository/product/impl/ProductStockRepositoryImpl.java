@@ -34,7 +34,7 @@ public class ProductStockRepositoryImpl implements ProductStockRepositoryCustom 
     }
 
     @Override
-    public Optional<ProductStock> findByStoreIdAndProductId(Long storeId, Long productId) {
+    public Optional<ProductStock> findByStoreIdAndProductIdWithFetchJoin(Long storeId, Long productId) {
         QProductStock productStock = QProductStock.productStock;
         QStore store = QStore.store;
         QProduct product = QProduct.product;
