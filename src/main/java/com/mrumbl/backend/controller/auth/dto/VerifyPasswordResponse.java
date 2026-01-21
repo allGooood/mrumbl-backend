@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class VerifyPasswordResDto {
+public class VerifyPasswordResponse {
     private boolean isVerified;
     private int attemptLeft;
 }

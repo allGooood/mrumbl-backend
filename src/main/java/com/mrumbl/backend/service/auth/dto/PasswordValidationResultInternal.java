@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class PasswordValidationResult {
+public class PasswordValidationResultInternal {
     private boolean isValid;
     private int attemptLeft;
 }

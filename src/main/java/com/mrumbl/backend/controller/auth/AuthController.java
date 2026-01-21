@@ -6,8 +6,7 @@ import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.controller.auth.dto.*;
 import com.mrumbl.backend.service.auth.AuthService;
 import com.mrumbl.backend.common.util.CookieManager;
-import com.mrumbl.backend.service.auth.dto.LoginResult;
-import com.mrumbl.backend.service.auth.dto.PasswordValidationResult;
+import com.mrumbl.backend.service.auth.mapper.AuthMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,27 +25,19 @@ public class AuthController {
     private final CookieManager cookieManager;
 
     @PostMapping("/login/email")
-    public Response<LoginResDto> login(@RequestBody LoginReqDto reqDto,
-                                       HttpServletResponse response) {
-//        log.info("[AuthController] POST /api/auth/login/email invoked. req={}", reqDto);
-
-        LoginResult loginResult = authService.login(reqDto);
+    public Response<LoginResponse> login(@RequestBody LoginRequest reqDto,
+                                         HttpServletResponse response) {
+        var loginResult = authService.login(reqDto);
 
         ResponseCookie cookie = cookieManager.createValidCookie(loginResult.getRefreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return Response.ok(LoginResDto.builder()
-                        .accessToken(loginResult.getAccessToken())
-                        .email(loginResult.getEmail())
-                        .attemptLeft(loginResult.getAttemptLeft())
-                .build());
+        return Response.ok(AuthMapper.toLoginResponse(loginResult));
     }
 
     @DeleteMapping("/logout")
     public Response<Void> logout(@RequestParam String email,
                                          HttpServletResponse response){
-//        log.info("[AuthController] DELETE /api/auth/logout invoked. email={}", email);
-
         // 1. Service에서 Redis의 RefreshToken 삭제
         authService.logout(email);
 
@@ -58,47 +49,31 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public Response<ReissueResDto> reissue(@RequestBody ReissueReqDto reqDto,
-                                           HttpServletResponse response){
-//        log.info("[AuthController] POST /api/auth/reissue invoked. req={}", reqDto);
-
+    public Response<ReissueResponse> reissue(@RequestBody ReissueRequest reqDto,
+                                             HttpServletResponse response){
         JwtToken tokens = authService.reissue(reqDto.getEmail(), reqDto.getRefreshToken());
 
         ResponseCookie cookie = cookieManager.createValidCookie(tokens.getRefreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return Response.ok(ReissueResDto.builder()
-                        .email(tokens.getEmail())
-                        .accessToken(tokens.getAccessToken())
-                .build());
+        return Response.ok(AuthMapper.toReissueResponse(tokens));
     }
 
     @PostMapping("/verification-code")
-    public Response<SendVerificationResDto> sendVerificationCode(@Valid @RequestBody SendVerificationReqDto reqDto){
-//        log.info("[AuthController] POST /api/auth/verification-code invoked. req={}", reqDto);
-
-        SendVerificationResDto resDto = authService.sendVerificationCode(reqDto.getEmail());
-        return Response.ok(resDto);
+    public Response<SendVerificationResponse> sendVerificationCode(@Valid @RequestBody SendVerificationRequest reqDto){
+        return Response.ok(authService.sendVerificationCode(reqDto.getEmail()));
     }
 
     @PostMapping("/verification-code/verify")
-    public Response<VerifyCodeResDto> verifyVerificationCode(@Valid @RequestBody VerifyCodeReqDto reqDto){
-//        log.info("[AuthController] POST /api/auth/verification-code/verify invoked. req={}", reqDto);
-
-        VerifyCodeResDto resDto = authService.verifyVerificationCode(reqDto.getEmail(), reqDto.getVerificationCode());
-        return Response.ok(resDto);
+    public Response<VerifyCodeResponse> verifyVerificationCode(@Valid @RequestBody VerifyCodeRequest reqDto){
+        return Response.ok(authService.verifyVerificationCode(reqDto.getEmail(), reqDto.getVerificationCode()));
     }
 
     @PostMapping("/password/verify")
-    public Response<VerifyPasswordResDto> verifyPassword(@AuthenticationPrincipal JwtUser user,
-                                                         @Valid @RequestBody VerifyPasswordReqDto reqDto){
-//        log.info("[AuthController] POST /api/auth/password/verify invoked. email={}, req={}", user.getEmail(), reqDto);
-
-        PasswordValidationResult passwordValidationResult = authService.verifyPassword(user, reqDto.getPassword());
-        return Response.ok(VerifyPasswordResDto.builder()
-                        .isVerified(passwordValidationResult.isValid())
-                        .attemptLeft(passwordValidationResult.getAttemptLeft())
-                .build());
+    public Response<VerifyPasswordResponse> verifyPassword(@AuthenticationPrincipal JwtUser user,
+                                                           @Valid @RequestBody VerifyPasswordRequest reqDto){
+        var passwordValidationResult = authService.verifyPassword(user.getEmail(), reqDto.getPassword());
+        return Response.ok(AuthMapper.toVerifyPasswordResponse(passwordValidationResult));
     }
 }
 

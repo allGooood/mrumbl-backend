@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class ReissueReqDto {
+public class VerifyCodeRequest {
 
     @NotBlank
     @Email
     private String email;
 
     @NotBlank
-    private String refreshToken;
+    private String verificationCode;
 }

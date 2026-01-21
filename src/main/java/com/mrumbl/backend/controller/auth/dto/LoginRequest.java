@@ -1,16 +1,18 @@
 package com.mrumbl.backend.controller.auth.dto;
 
+import com.mrumbl.backend.common.Sensitive;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class VerifyCodeReqDto {
+public class LoginRequest {
 
     @NotBlank
     @Email
     private String email;
 
     @NotBlank
-    private String verificationCode;
+    @Sensitive
+    private String password;
 }

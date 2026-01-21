@@ -3,7 +3,6 @@ package com.mrumbl.backend.service.auth;
 import com.mrumbl.backend.common.enumeration.MemberState;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
 import com.mrumbl.backend.common.jwt.JwtToken;
-import com.mrumbl.backend.common.jwt.JwtUser;
 import com.mrumbl.backend.common.jwt.TokenManager;
 import com.mrumbl.backend.common.util.RandomManager;
 import com.mrumbl.backend.controller.auth.dto.*;
@@ -16,9 +15,10 @@ import com.mrumbl.backend.repository.member.MemberRepository;
 import com.mrumbl.backend.repository.redis.RedisTokenRepository;
 import com.mrumbl.backend.common.properties.JwtProperties;
 import com.mrumbl.backend.repository.redis.RedisVerificationCodeRepository;
-import com.mrumbl.backend.service.auth.dto.LoginResult;
-import com.mrumbl.backend.service.auth.dto.PasswordValidationResult;
+import com.mrumbl.backend.service.auth.dto.LoginResultInternal;
+import com.mrumbl.backend.service.auth.dto.PasswordValidationResultInternal;
 import com.mrumbl.backend.service.external.MailService;
+import com.mrumbl.backend.service.member.validation.MemberValidator;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,20 +38,19 @@ public class AuthService {
     private final MailService mailService;
     private final PasswordService passwordService;
 
+    private final MemberValidator memberValidator;
+
     private final TokenManager tokenManager;
     private final JwtProperties jwtProperties;
     private final RandomManager randomManager;
 
 
     @Transactional(noRollbackFor = BusinessException.class)
-    public LoginResult login(LoginReqDto reqDto){
-
-        //TODO - 사용 중지 회원인 경우 에러 설정
-
+    public LoginResultInternal login(LoginRequest reqDto){
         Member memberFound = memberRepository.findByEmailAndState(reqDto.getEmail(), MemberState.ACTIVE)
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        PasswordValidationResult passwordValidation
+        PasswordValidationResultInternal passwordValidation
                 = passwordService.validatePasswordAndHandleLock(memberFound, reqDto.getPassword());
 
         JwtToken tokens = null;
@@ -67,12 +66,15 @@ public class AuthService {
                     .build());
 
             memberFound.updateLastLoginAt();
-            memberRepository.save(memberFound);
 
             attemptLeft = PasswordService.MAX_ATTEMPT;
+            log.info("Login successful. email={}", memberFound.getEmail());
+
+        } else {
+            log.warn("Login failed. email={}, attemptLeft={}", memberFound.getEmail(), attemptLeft);
         }
 
-        return LoginResult.builder()
+        return LoginResultInternal.builder()
                 .accessToken(tokens != null ? tokens.getAccessToken() : null)
                 .refreshToken(tokens != null ? tokens.getRefreshToken() : null)
                 .attemptLeft(attemptLeft)
@@ -82,11 +84,11 @@ public class AuthService {
 
     public void logout(String email){
         redisTokenRepository.deleteById(email);
+        log.info("Logout successful. email={}", email);
     }
 
     @Transactional(readOnly = true)
     public JwtToken reissue(String email, String refreshToken) {
-
         // 1. token 유효성 검증 (유효하지 않으면 BusinessException 발생)
         if(!tokenManager.isValidateToken(refreshToken)){
             throw new BusinessException(AuthErrorCode.INVALID_AUTH_TOKEN);
@@ -98,10 +100,8 @@ public class AuthService {
                 .filter(t -> t.equals(refreshToken))
                 .orElseThrow(() -> new BusinessException(AuthErrorCode.EXPIRED_AUTH_TOKEN));
 
-
         // 3. 사용자 정보 확인 : 존재하는 유저인가, 활성화 회원인가
-        Member memberFound = memberRepository.findByEmailAndState(email, MemberState.ACTIVE)
-                .orElseThrow(() -> new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND));
+        Member memberFound = memberValidator.checkAndReturnExistingMember(email);
 
         // 4. 토큰 발행
         JwtToken tokens = tokenManager.createTokens(memberFound);
@@ -111,10 +111,12 @@ public class AuthService {
                 .ttl(jwtProperties.getRefreshTokenExpiration())
                 .build());
 
+        log.info("Token reissued successfully. email={}", email);
+
         return tokens;
     }
 
-    public SendVerificationResDto sendVerificationCode(String email) {
+    public SendVerificationResponse sendVerificationCode(String email) {
         // 1. 난수 생성 -> Redis 저장
         String verificationCode = randomManager.createNumericCode(6);
         redisVerificationCodeRepository.save(RedisVerificationCode.builder()
@@ -125,12 +127,14 @@ public class AuthService {
         // 2. Email 전송
         try{
             mailService.sendMimeMessage("인증번호 입니다.", verificationCode, email);
+            log.info("Verification code sent successfully. email={}", email);
         } catch (Exception e){
             redisVerificationCodeRepository.deleteById(email);
+            log.error("Failed to send verification code. email={}", email, e);
             throw e;
         }
 
-        return SendVerificationResDto.builder()
+        return SendVerificationResponse.builder()
                 .email(email)
                 .issuedAt(LocalDateTime.now())
                 .ttlSeconds(180)
@@ -138,27 +142,30 @@ public class AuthService {
     }
 
     // TODO - Test 필요 (계정 이의신청 중)
-    public VerifyCodeResDto verifyVerificationCode(String email, String verificationCode){
-
+    public VerifyCodeResponse verifyVerificationCode(String email, String verificationCode){
         RedisVerificationCode codeFound = redisVerificationCodeRepository.findById(email)
-                .orElseThrow(() -> new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED));
+                .orElseThrow(() -> {
+                    log.warn("Verification code expired. email={}", email);
+                    return new BusinessException(AuthErrorCode.VERIFICATION_CODE_EXPIRED);
+                });
+
         if(!codeFound.getVerificationCode().equals(verificationCode)){
+            log.warn("Verification code mismatch. email={}", email);
             throw new BusinessException(AuthErrorCode.VERIFICATION_CODE_MISMATCH);
         }
 
         redisVerificationCodeRepository.deleteById(email);
+        log.info("Verification code verified successfully. email={}", email);
 
-        return VerifyCodeResDto.builder()
+        return VerifyCodeResponse.builder()
                 .email(email)
                 .verifiedAt(LocalDateTime.now())
                 .build();
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
-    public PasswordValidationResult verifyPassword(JwtUser user, String password){
-
-        Member memberFound = memberRepository.findByEmailAndState(user.getEmail(), MemberState.ACTIVE)
-                .orElseThrow(() -> new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND));
+    public PasswordValidationResultInternal verifyPassword(String email, String password){
+        Member memberFound = memberValidator.checkAndReturnExistingMember(email);
 
         return passwordService.validatePasswordAndHandleLock(memberFound, password);
     }
