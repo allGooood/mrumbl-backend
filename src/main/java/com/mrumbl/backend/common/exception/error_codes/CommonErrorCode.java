@@ -10,6 +10,7 @@ public enum CommonErrorCode implements ErrorCode {
     INVALID_REQUEST(400, "COM-001", "Invalid request format."),
     MISSING_PARAMETER(400, "COM-002", "Required parameter is missing."),
     INVALID_PARAMETER_TYPE(400, "COM-003", "Invalid parameter type."),
+    INVALID_ENUM_VALUE(400, "COM-010", "Invalid enum value."),
     UNAUTHORIZED(401, "COM-004", "Authentication is required."),
     FORBIDDEN(403, "COM-005", "Access is denied."),
     RESOURCE_NOT_FOUND(404, "COM-006", "Requested resource not found."),

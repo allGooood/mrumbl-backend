@@ -1,10 +1,7 @@
 package com.mrumbl.backend.common.enumeration;
 
-import com.mrumbl.backend.common.exception.BusinessException;
-import com.mrumbl.backend.common.exception.error_codes.OrderErrorCode;
-import lombok.extern.slf4j.Slf4j;
+import com.mrumbl.backend.common.util.EnumConverter;
 
-@Slf4j
 public enum OrderState {
     CREATED,
     PAID,
@@ -13,12 +10,7 @@ public enum OrderState {
     PICKED_UP,
     CANCELED;
 
-    public static OrderState from(String orderStateStr){
-        try{
-            return OrderState.valueOf(orderStateStr);
-        }catch (Exception e){
-            log.warn("Invalid order state. orderState={}", orderStateStr);
-            throw new BusinessException(OrderErrorCode.INVALID_ORDER_STATE);
-        }
+    public static OrderState from(String orderStateStr) {
+        return EnumConverter.from(orderStateStr, OrderState.class, "OrderState");
     }
 }

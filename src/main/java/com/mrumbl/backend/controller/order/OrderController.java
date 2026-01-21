@@ -26,7 +26,6 @@ public class OrderController {
     @PostMapping
     public Response<OrderResDto> addOrder(@AuthenticationPrincipal JwtUser user,
                                           @Valid @RequestBody AddOrderReqDto reqDto) {
-        System.out.println(reqDto.toString());
         return Response.ok(orderService.addOrder(user.getEmail(), reqDto));
     }
 

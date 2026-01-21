@@ -1,5 +1,6 @@
 package com.mrumbl.backend.common.enumeration;
 
+import com.mrumbl.backend.common.util.EnumConverter;
 import lombok.*;
 
 @Getter
@@ -12,4 +13,8 @@ public enum ProductCategory {
 
     private final String categoryName;
     private final int displayOrder;
+
+    public static ProductCategory from(String productCategoryStr) {
+        return EnumConverter.from(productCategoryStr, ProductCategory.class, "ProductCategory");
+    }
 }

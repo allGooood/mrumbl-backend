@@ -14,6 +14,7 @@ public enum OrderErrorCode implements ErrorCode {
     ORDER_ALREADY_PROCESSED(409, "ORD-005", "Order has already been processed."),
     INVALID_ORDER_STATE(400, "ORD-006", "Order state cannot be changed."),
     ORDER_CANCELLATION_EXPIRED(403, "ORD-007", "Order cancellation period has expired."),
+    INVALID_PAYMENT_METHOD(400, "ORD-009", "Invalid payment method."),
     PAYMENT_FAILED(402, "ORD-008", "Payment failed.");
 
     private final int status;

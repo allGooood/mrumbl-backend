@@ -14,6 +14,7 @@ public enum AccountErrorCode implements ErrorCode {
     ACCOUNT_WITHDRAWN(403, "ACC-005", "Account has been withdrawn."),
     INVALID_ADDRESS(400, "ACC-006", "Invalid address information."),
     ADDRESS_NOT_CHANGED(409, "ACC-007", "Address cannot be updated with the same value."),
+    INVALID_MEMBER_STATE(400, "ACC-009", "Invalid member state."),
     ACCOUNT_LOCKED(423, "ACC-008", "Account is locked.");
 
     private final int status;
