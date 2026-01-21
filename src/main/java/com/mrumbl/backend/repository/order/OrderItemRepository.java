@@ -1,4 +1,4 @@
-package com.mrumbl.backend.repository;
+package com.mrumbl.backend.repository.order;
 
 import com.mrumbl.backend.domain.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;

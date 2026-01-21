@@ -4,7 +4,7 @@ import com.mrumbl.backend.controller.cart.dto.CookieOptionDetailDto;
 import com.mrumbl.backend.controller.cart.dto.CookieOptionDto;
 import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.redis.RedisCart;
-import com.mrumbl.backend.repository.ProductCookieRepository;
+import com.mrumbl.backend.repository.product.ProductCookieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

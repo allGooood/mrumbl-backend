@@ -3,7 +3,7 @@ package com.mrumbl.backend.service.member.validation;
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
 import com.mrumbl.backend.domain.Member;
-import com.mrumbl.backend.repository.MemberRepository;
+import com.mrumbl.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

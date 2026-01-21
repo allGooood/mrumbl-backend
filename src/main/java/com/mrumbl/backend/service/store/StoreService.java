@@ -6,7 +6,7 @@ import com.mrumbl.backend.controller.store.dto.GetStoreResDto;
 import com.mrumbl.backend.controller.store.dto.StoreListResponse;
 import com.mrumbl.backend.controller.store.dto.StoreSummaryDto;
 import com.mrumbl.backend.domain.Store;
-import com.mrumbl.backend.repository.StoreRepository;
+import com.mrumbl.backend.repository.store.StoreRepository;
 import com.mrumbl.backend.service.store.mapper.StoreMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

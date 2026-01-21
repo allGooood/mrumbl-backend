@@ -3,7 +3,7 @@ package com.mrumbl.backend.service.product;
 import com.mrumbl.backend.common.enumeration.ProductCategory;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.domain.Product;
-import com.mrumbl.backend.repository.ProductRepository;
+import com.mrumbl.backend.repository.product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

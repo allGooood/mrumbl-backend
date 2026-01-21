@@ -4,8 +4,8 @@ import com.mrumbl.backend.controller.cart.dto.GetCartResDto;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
 import com.mrumbl.backend.domain.redis.RedisCart;
-import com.mrumbl.backend.repository.ProductRepository;
-import com.mrumbl.backend.repository.ProductStockRepository;
+import com.mrumbl.backend.repository.product.ProductRepository;
+import com.mrumbl.backend.repository.product.ProductStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class CartMapper {
         // isSoldOut
         Product product = productRepository.findByIdAndInUse(cart.getProductId(), true)
                 .orElse(null);
-        ProductStock productStock = productStockRepository.getProductDetail(cart.getStoreId(), cart.getProductId())
+        ProductStock productStock = productStockRepository.findByStoreIdAndProductId(cart.getStoreId(), cart.getProductId())
                 .orElse(null);
         Boolean isSoldOut = (product == null || productStock == null) ? true : productStock.getIsSoldOut();
 

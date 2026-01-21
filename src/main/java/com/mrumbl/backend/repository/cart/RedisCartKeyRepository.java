@@ -1,4 +1,4 @@
-package com.mrumbl.backend.repository.redis.cart;
+package com.mrumbl.backend.repository.cart;
 
 import com.mrumbl.backend.domain.redis.RedisCartKey;
 import org.springframework.data.repository.CrudRepository;

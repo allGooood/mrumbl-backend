@@ -10,9 +10,9 @@ import com.mrumbl.backend.controller.product.dto.GetProductDetailResDto;
 import com.mrumbl.backend.controller.product.dto.GetStoreProductsResDto;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
-import com.mrumbl.backend.repository.ProductCookieRepository;
-import com.mrumbl.backend.repository.ProductStockRepository;
-import com.mrumbl.backend.repository.StoreRepository;
+import com.mrumbl.backend.repository.product.ProductCookieRepository;
+import com.mrumbl.backend.repository.product.ProductStockRepository;
+import com.mrumbl.backend.repository.store.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class ProductService {
 
         validateStoreExists(storeId);
 
-        List<ProductStock> stocks = productStockRepository.findByStoreIdWithStoreAndProduct(storeId);
+        List<ProductStock> stocks = productStockRepository.findByStoreIdWithFetchJoin(storeId);
         log.info("[ProductService] Found {} products for storeId={}", stocks.size(), storeId);
 
         Map<ProductCategory, List<GetStoreProductsResDto.StoreProductDto>> map = stocks
@@ -79,7 +79,7 @@ public class ProductService {
 
         validateStoreExists(storeId);
 
-        ProductStock stockFound = productStockRepository.getProductDetail(storeId, productId)
+        ProductStock stockFound = productStockRepository.findByStoreIdAndProductId(storeId, productId)
                 .orElseThrow(() -> {
                     log.warn("[ProductService] Product not found in store. productId={}, storeId={}", productId, storeId);
                     return new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND);

@@ -1,4 +1,4 @@
-package com.mrumbl.backend.repository;
+package com.mrumbl.backend.repository.product;
 
 import com.mrumbl.backend.domain.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

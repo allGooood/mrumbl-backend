@@ -3,7 +3,7 @@ package com.mrumbl.backend.service.store.validation;
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.StoreErrorCode;
 import com.mrumbl.backend.domain.Store;
-import com.mrumbl.backend.repository.StoreRepository;
+import com.mrumbl.backend.repository.store.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

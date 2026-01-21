@@ -7,7 +7,7 @@ import com.mrumbl.backend.controller.member.dto.CheckEmailAvailabilityResDto;
 import com.mrumbl.backend.domain.Member;
 import com.mrumbl.backend.controller.member.dto.SignUpResDto;
 import com.mrumbl.backend.common.enumeration.MemberState;
-import com.mrumbl.backend.repository.MemberRepository;
+import com.mrumbl.backend.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

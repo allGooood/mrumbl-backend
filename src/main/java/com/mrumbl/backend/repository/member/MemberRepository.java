@@ -1,4 +1,4 @@
-package com.mrumbl.backend.repository;
+package com.mrumbl.backend.repository.member;
 
 import com.mrumbl.backend.common.enumeration.MemberState;
 import com.mrumbl.backend.domain.Member;
@@ -11,9 +11,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmailAndState(String email, MemberState state);
     Optional<Member> findByIdAndState(Long memberId, MemberState state);
     Optional<Member> findByEmail(String email);
-
-//    @Query("select m from Member m where m.email = :email and m.state = 'ACTIVE'")
-//    Optional<Member> findActiveByEmail(@Param("email") String email);
 
     boolean existsByEmail(String email);
 }

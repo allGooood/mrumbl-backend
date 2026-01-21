@@ -12,7 +12,7 @@ import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AuthErrorCode;
 import com.mrumbl.backend.domain.redis.RedisToken;
 import com.mrumbl.backend.domain.redis.RedisVerificationCode;
-import com.mrumbl.backend.repository.MemberRepository;
+import com.mrumbl.backend.repository.member.MemberRepository;
 import com.mrumbl.backend.repository.redis.RedisTokenRepository;
 import com.mrumbl.backend.common.properties.JwtProperties;
 import com.mrumbl.backend.repository.redis.RedisVerificationCodeRepository;
