@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CheckEmailAvailabilityReqDto {
+public class EmailAvailabilityRequest {
 
     @NotBlank
     @Email

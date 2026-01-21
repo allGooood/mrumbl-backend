@@ -2,10 +2,10 @@ package com.mrumbl.backend.controller.order;
 
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.common.jwt.JwtUser;
-import com.mrumbl.backend.controller.order.dto.AddOrderReqDto;
-import com.mrumbl.backend.controller.order.dto.GetOrderDetailResDto;
-import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
-import com.mrumbl.backend.controller.order.dto.OrderResDto;
+import com.mrumbl.backend.controller.order.dto.AddOrderRequest;
+import com.mrumbl.backend.controller.order.dto.OrderDetailResponse;
+import com.mrumbl.backend.controller.order.dto.OrdersResponse;
+import com.mrumbl.backend.controller.order.dto.AddOrderResponse;
 import com.mrumbl.backend.service.order.OrderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -24,19 +24,19 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public Response<OrderResDto> addOrder(@AuthenticationPrincipal JwtUser user,
-                                          @Valid @RequestBody AddOrderReqDto reqDto) {
+    public Response<AddOrderResponse> addOrder(@AuthenticationPrincipal JwtUser user,
+                                               @Valid @RequestBody AddOrderRequest reqDto) {
         return Response.ok(orderService.addOrder(user.getEmail(), reqDto));
     }
 
     @GetMapping
-    public Response<List<GetOrderResDto>> getOrders(@AuthenticationPrincipal JwtUser user) {
+    public Response<List<OrdersResponse>> getOrders(@AuthenticationPrincipal JwtUser user) {
         return Response.ok(orderService.getOrders(user.getEmail()));
     }
 
     @GetMapping("/{orderId}")
-    public Response<GetOrderDetailResDto> getOrderDetail(@AuthenticationPrincipal JwtUser user,
-                                                         @PathVariable @Positive Long orderId){
+    public Response<OrderDetailResponse> getOrderDetail(@AuthenticationPrincipal JwtUser user,
+                                                        @PathVariable @Positive Long orderId){
         return Response.ok(orderService.getOrderDetail(user.getEmail(), orderId));
     }
 }

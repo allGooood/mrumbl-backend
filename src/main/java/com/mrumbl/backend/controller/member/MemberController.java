@@ -18,37 +18,26 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping
-    public Response<SignUpResDto> signUp(@Valid @RequestBody SignUpReqDto reqDto){
-//        log.info("[MemberController] POST /api/members invoked. reqDto={}", reqDto);
-
-        SignUpResDto resDto = memberService.signUp(reqDto.getEmail(),
-                reqDto.getPassword(),
-                reqDto.getName());
-        return Response.ok(resDto);
+    public Response<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest reqDto){
+        return Response.ok(memberService.signUp(reqDto.getEmail(), reqDto.getPassword(), reqDto.getName()));
     }
 
     @PutMapping("/password")
     public Response<Void> changePassword(@AuthenticationPrincipal JwtUser user,
-                                         @Valid @RequestBody ChangePasswordReqDto reqDto){
-//        log.info("[MemberController] PUT /api/members/password invoked. email={}", user.getEmail());
-        memberService.changePassword(user, reqDto.getPassword());
-
+                                         @Valid @RequestBody ChangePasswordRequest reqDto){
+        memberService.changePassword(user.getEmail(), reqDto.getPassword());
         return Response.ok(null);
     }
 
     @PutMapping
     public Response<Void> changeAddress(@AuthenticationPrincipal JwtUser user,
-                                        @Valid @RequestBody ChangeAddressReqDto reqDto){
-//        log.info("[MemberController] PUT /api/members invoked. email={}, reqDto={}", user.getEmail(), reqDto);
-        memberService.changeAddress(user, reqDto.getAddress(), reqDto.getAddressDetail(), reqDto.getPostcode());
-
+                                        @Valid @RequestBody ChangeAddressRequest reqDto){
+        memberService.changeAddress(user.getEmail(), reqDto.getAddress(), reqDto.getAddressDetail(), reqDto.getPostcode());
         return Response.ok(null);
     }
 
     @PostMapping("/availability")
-    public Response<CheckEmailAvailabilityResDto> checkEmailAvailability(@Valid @RequestBody CheckEmailAvailabilityReqDto reqDto){
-//        log.info("[MemberController] POST /api/members/availability invoked. email={}", reqDto.getEmail());
-
+    public Response<EmailAvailabilityResponse> checkEmailAvailability(@Valid @RequestBody EmailAvailabilityRequest reqDto){
         return Response.ok(memberService.checkEmailAvailability(reqDto.getEmail()));
     }
 

@@ -67,12 +67,12 @@ class OrderControllerTest {
         // given
         JwtUser jwtUser = createJwtUser();
         setSecurityContext(jwtUser);
-        AddOrderReqDto reqDto = createAddOrderReqDto();
-        OrderResDto responseDto = OrderResDto.builder()
+        AddOrderRequest reqDto = createAddOrderReqDto();
+        AddOrderResponse responseDto = AddOrderResponse.builder()
                 .orderNo("M20241201ABC123")
                 .build();
 
-        given(orderService.addOrder(eq(jwtUser.getEmail()), any(AddOrderReqDto.class)))
+        given(orderService.addOrder(eq(jwtUser.getEmail()), any(AddOrderRequest.class)))
                 .willReturn(responseDto);
 
         // when & then
@@ -91,7 +91,7 @@ class OrderControllerTest {
         // given
         JwtUser jwtUser = createJwtUser();
         setSecurityContext(jwtUser);
-        AddOrderReqDto reqDto = new AddOrderReqDto();
+        AddOrderRequest reqDto = new AddOrderRequest();
         reqDto.setItems(new ArrayList<>());  // 빈 리스트
         reqDto.setStoreId(1L);
         reqDto.setPaymentMethod("CARD");
@@ -113,7 +113,7 @@ class OrderControllerTest {
         // given
         JwtUser jwtUser = createJwtUser();
         setSecurityContext(jwtUser);
-        AddOrderReqDto reqDto = new AddOrderReqDto();
+        AddOrderRequest reqDto = new AddOrderRequest();
         reqDto.setItems(createOrderItemDtos());
         reqDto.setStoreId(null);  // null
         reqDto.setPaymentMethod("CARD");
@@ -135,8 +135,8 @@ class OrderControllerTest {
         // given
         JwtUser jwtUser = createJwtUser();
         setSecurityContext(jwtUser);
-        List<GetOrderResDto> responseDto = List.of(
-                GetOrderResDto.builder()
+        List<OrdersResponse> responseDto = List.of(
+                OrdersResponse.builder()
                         .orderId(1L)
                         .paymentAmount(11000)
                         .itemCount(2)
@@ -163,7 +163,7 @@ class OrderControllerTest {
         JwtUser jwtUser = createJwtUser();
         setSecurityContext(jwtUser);
         Long orderId = 1L;
-        GetOrderDetailResDto responseDto = GetOrderDetailResDto.builder()
+        OrderDetailResponse responseDto = OrderDetailResponse.builder()
                 .orderId(orderId)
                 .orderNo("M20241201ABC123")
                 .paymentAmount(11000)
@@ -209,8 +209,8 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private AddOrderReqDto createAddOrderReqDto() {
-        AddOrderReqDto reqDto = new AddOrderReqDto();
+    private AddOrderRequest createAddOrderReqDto() {
+        AddOrderRequest reqDto = new AddOrderRequest();
         reqDto.setItems(createOrderItemDtos());
         reqDto.setStoreId(1L);
         reqDto.setPaymentMethod("CARD");

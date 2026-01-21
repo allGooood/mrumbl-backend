@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class OrderResDto {
+public class AddOrderResponse {
     private String orderNo;
 }

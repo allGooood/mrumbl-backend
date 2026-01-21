@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-public class AddOrderReqDto {
+public class AddOrderRequest {
     @NotEmpty(message = "items must not be empty")
     @Valid
     private List<OrderItemDto> items;

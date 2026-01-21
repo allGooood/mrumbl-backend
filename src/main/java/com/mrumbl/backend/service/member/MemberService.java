@@ -2,12 +2,12 @@ package com.mrumbl.backend.service.member;
 
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.AccountErrorCode;
-import com.mrumbl.backend.common.jwt.JwtUser;
-import com.mrumbl.backend.controller.member.dto.CheckEmailAvailabilityResDto;
+import com.mrumbl.backend.controller.member.dto.EmailAvailabilityResponse;
 import com.mrumbl.backend.domain.Member;
-import com.mrumbl.backend.controller.member.dto.SignUpResDto;
+import com.mrumbl.backend.controller.member.dto.SignUpResponse;
 import com.mrumbl.backend.common.enumeration.MemberState;
 import com.mrumbl.backend.repository.member.MemberRepository;
+import com.mrumbl.backend.service.member.validation.MemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,12 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+
+    private final MemberValidator memberValidator;
+
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public SignUpResDto signUp(String email, String password, String name){
 
-        if(memberRepository.findByEmail(email).isPresent()){
+    @Transactional
+    public SignUpResponse signUp(String email, String password, String name){
+        // 회원 상태와 상관없이 모두 검색
+        if(memberRepository.existsByEmail(email)){
             throw new BusinessException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
@@ -35,49 +39,37 @@ public class MemberService {
                 .state(MemberState.ACTIVE)
                 .build();
 
-        Member savedMember = memberRepository.save(member);
-        return SignUpResDto.builder()
-                .email(savedMember.getEmail())
+        memberRepository.save(member);
+        log.info("Member signed up successfully. email={}", email);
+
+        return SignUpResponse.builder()
+                .email(email)
                 .build();
     }
 
     @Transactional
-    public void changePassword(JwtUser user, String password){
-        String email = user.getEmail();
-        Member memberFound = memberRepository.findByEmailAndState(email, MemberState.ACTIVE)
-                .orElseThrow(() ->  {
-                    log.warn("[changePassword] Member not found or inactive. email={}", email);
-                    return new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND);
-                });
+    public void changePassword(String email, String password){
+        Member memberFound = memberValidator.checkAndReturnExistingMember(email);
 
         String newPassword = passwordEncoder.encode(password);
         memberFound.updatePassword(newPassword);
-
-        log.info("[changePassword] Password changed successfully. email={}", email);
+        log.info("Password changed successfully. email={}", email);
     }
 
     @Transactional
-    public void changeAddress(JwtUser user, String address, String addressDetail, String postcode){
-        Long memberId = user.getMemberId();
-
-        log.info("[changeAddress] 요청 memberId={}, address={}, postcode={}", memberId, address, postcode);
-
-        Member memberFound = memberRepository.findByIdAndState(memberId, MemberState.ACTIVE)
-                .orElseThrow(() -> {
-                    log.warn("[changeAddress] Member not found or inactive. memberId={}", memberId);
-                    return new BusinessException(AccountErrorCode.MEMBER_NOT_FOUND);
-                });
+    public void changeAddress(String email, String address, String addressDetail, String postcode){
+        Member memberFound = memberValidator.checkAndReturnExistingMember(email);
 
         memberFound.changeAddress(address, addressDetail, postcode);
-        log.info("[changeAddress] 주소 변경 완료 memberId={}", memberId);
+        log.info("Address changed successfully. email={}", email);
     }
 
-    public CheckEmailAvailabilityResDto checkEmailAvailability(String email){
-        log.info("[checkEmailAvailability] 요청 email={}", email);
-
+    public EmailAvailabilityResponse checkEmailAvailability(String email){
+        // 회원 상태와 상관없이 모두 검색
         boolean isAvailable = memberRepository.findByEmail(email).isEmpty();
+        log.info("Email availability checked. email={}, isAvailable={}", email, isAvailable);
 
-        return CheckEmailAvailabilityResDto.builder()
+        return EmailAvailabilityResponse.builder()
                 .isAvailable(isAvailable)
                 .build();
     }

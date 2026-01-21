@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CheckEmailAvailabilityResDto {
+public class EmailAvailabilityResponse {
     private boolean isAvailable;
 }

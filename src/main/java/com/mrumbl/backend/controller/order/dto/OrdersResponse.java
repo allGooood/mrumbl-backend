@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class GetOrderResDto {
+public class OrdersResponse {
     private Integer paymentAmount;
     private String imageUrl;
     private Integer itemCount;

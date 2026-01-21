@@ -52,7 +52,7 @@ public class OrderService {
     private final ProductValidator productValidator;
 
     @Transactional
-    public OrderResDto addOrder(String email, AddOrderReqDto reqDto) {
+    public AddOrderResponse addOrder(String email, AddOrderRequest reqDto) {
         // Validation
         Member memberFound = memberValidator.checkAndReturnExistingMember(email);
         Store storeFound = storeValidator.checkAndReturnStore(reqDto.getStoreId());
@@ -81,19 +81,19 @@ public class OrderService {
 
         log.info("Order created successfully. orderNo={}, memberId={}, storeId={}", orderNo, memberFound.getId(), storeFound.getId());
 
-        return OrderResDto.builder()
+        return AddOrderResponse.builder()
                 .orderNo(orderNo)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public List<GetOrderResDto> getOrders(String email) {
+    public List<OrdersResponse> getOrders(String email) {
         memberValidator.checkExistingMember(email);
 
         List<Order> ordersFound = orderRepository.findOrdersAndItemsByEmail(email);
         log.info("Found {} orders for email={}", ordersFound.size(), email);
 
-        List<GetOrderResDto> response = ordersFound.stream()
+        List<OrdersResponse> response = ordersFound.stream()
                 .map(order -> {
                     if (order.getOrderItems() == null || order.getOrderItems().isEmpty()) {
                         log.warn("Order has no items. orderId={}", order.getId());
@@ -108,10 +108,10 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public GetOrderDetailResDto getOrderDetail(String email, Long orderId){
+    public OrderDetailResponse getOrderDetail(String email, Long orderId){
         Order orderFound = orderValidator.checkAndReturnExistingOrder(email, orderId);
 
-        GetOrderDetailResDto response = toGetOrderDetailResDto(orderFound);
+        OrderDetailResponse response = toGetOrderDetailResDto(orderFound);
         log.info("Order detail built. email={}, orderId={}", email, orderId);
 
         return response;
@@ -140,7 +140,7 @@ public class OrderService {
     }
 
     private Order createOrderEntity(Member member, Store store, String orderNo,
-                                    PaymentMethod paymentMethod, AddOrderReqDto reqDto) {
+                                    PaymentMethod paymentMethod, AddOrderRequest reqDto) {
         return Order.builder()
                 .member(member) 
                 .store(store)

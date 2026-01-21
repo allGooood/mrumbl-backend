@@ -4,6 +4,6 @@ import lombok.*;
 
 @Builder
 @Getter
-public class SignUpResDto {
+public class SignUpResponse {
     private String email;
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Builder
 @Getter
-public class GetOrderDetailResDto {
+public class OrderDetailResponse {
     private Long orderId;
     private String orderNo;
     private LocalDateTime orderedAt;

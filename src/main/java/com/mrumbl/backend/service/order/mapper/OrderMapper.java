@@ -1,7 +1,7 @@
 package com.mrumbl.backend.service.order.mapper;
 
-import com.mrumbl.backend.controller.order.dto.GetOrderDetailResDto;
-import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
+import com.mrumbl.backend.controller.order.dto.OrderDetailResponse;
+import com.mrumbl.backend.controller.order.dto.OrdersResponse;
 import com.mrumbl.backend.controller.order.dto.OrderItemDto;
 import com.mrumbl.backend.domain.Order;
 import com.mrumbl.backend.domain.OrderItem;
@@ -13,11 +13,11 @@ import java.util.List;
  */
 public class OrderMapper {
 
-    public static GetOrderResDto toGetOrderResDto(Order order) {
+    public static OrdersResponse toGetOrderResDto(Order order) {
         List<OrderItem> orderItems = order.getOrderItems();
         OrderItem firstItem = orderItems.get(0);
 
-        return GetOrderResDto.builder()
+        return OrdersResponse.builder()
                 .paymentAmount(order.getPaymentAmount())
                 .imageUrl(firstItem.getImageUrlSnapshot())
                 .itemCount(orderItems.size())
@@ -40,13 +40,13 @@ public class OrderMapper {
                 .build();
     }
 
-    public static GetOrderDetailResDto toGetOrderDetailResDto(Order order){
+    public static OrderDetailResponse toGetOrderDetailResDto(Order order){
         List<OrderItemDto> items = order.getOrderItems()
                 .stream()
                 .map(OrderMapper::toOrderItemDto)
                 .toList();
 
-        return GetOrderDetailResDto.builder()
+        return OrderDetailResponse.builder()
                 .orderId(order.getId())
                 .orderNo(order.getOrderNo())
                 .orderedAt(order.getOrderedAt())
