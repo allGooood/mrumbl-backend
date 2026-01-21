@@ -1,13 +1,12 @@
 package com.mrumbl.backend.service.store;
 
-import com.mrumbl.backend.common.exception.BusinessException;
-import com.mrumbl.backend.common.exception.error_codes.StoreErrorCode;
-import com.mrumbl.backend.controller.store.dto.GetStoreResDto;
+import com.mrumbl.backend.controller.store.dto.StoreDetailResponse;
 import com.mrumbl.backend.controller.store.dto.StoreListResponse;
-import com.mrumbl.backend.controller.store.dto.StoreSummaryDto;
+import com.mrumbl.backend.controller.store.dto.StoreInformationDto;
 import com.mrumbl.backend.domain.Store;
 import com.mrumbl.backend.repository.store.StoreRepository;
 import com.mrumbl.backend.service.store.mapper.StoreMapper;
+import com.mrumbl.backend.service.store.validation.StoreValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,46 +21,42 @@ import java.util.List;
 public class StoreService {
     private final StoreRepository storeRepository;
 
+    private final StoreValidator storeValidator;
+
     @Transactional(readOnly = true)
     public StoreListResponse searchStores(String keyword){
-        log.info("[StoreService] searchStores request received. keyword={}", keyword);
+        String trimmedKeyword = keyword.trim();
+        List<Store> storesFound = storeRepository.searchByKeyword(trimmedKeyword);
+        log.info("Found {} stores for keyword={}", storesFound.size(), trimmedKeyword);
 
-        List<Store> results = storeRepository.searchByKeyword(keyword);
-        log.info("[StoreService] Found {} stores for keyword={}", results.size(), keyword);
-
-        List<StoreSummaryDto> stores = results.stream()
-                .map(StoreMapper::toStoreSummaryDto)
+        List<StoreInformationDto> storeDtos = storesFound.stream()
+                .map(StoreMapper::toStoreInformationDto)
                 .toList();
 
         return StoreListResponse.builder()
-                .stores(stores)
+                .stores(storeDtos)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public GetStoreResDto getStore(Long storeId){
-        log.info("[StoreService] getStore request received. storeId={}", storeId);
+    public StoreDetailResponse getStore(Long storeId){
+        Store storeFound = storeValidator.checkAndReturnStore(storeId);
+        log.info("Store found. storeId={}, storeName={}", storeId, storeFound.getStoreName());
 
-        Store storeEntity = storeRepository.findById(storeId)
-                .orElseThrow(() -> {
-                    log.warn("[StoreService] Store not found. storeId={}", storeId);
-                    return new BusinessException(StoreErrorCode.STORE_NOT_FOUND);
-                });
-
-        return StoreMapper.toGetStoreResDto(storeEntity);
+        return StoreMapper.toStoreDetailResponse(storeFound);
     }
 
     @Transactional(readOnly = true)
-    public StoreListResponse getStoreNearby(BigDecimal x, BigDecimal y, Integer r){
+    public StoreListResponse getNearbyStores(BigDecimal longitude, BigDecimal latitude, Integer radius){
+        List<Store> storesFound = storeRepository.findNearbyStores(longitude, latitude, radius);
+        log.info("Found {} stores within {}m radius", storesFound.size(), radius);
 
-        List<Store> results = storeRepository.findNearbyStores(x, y, r);
-
-        List<StoreSummaryDto> stores = results.stream()
-                .map(store -> StoreMapper.toStoreSummaryDto(store, true))
+        List<StoreInformationDto> storeDtos = storesFound.stream()
+                .map(StoreMapper::toStoreInformationDto)
                 .toList();
 
         return StoreListResponse.builder()
-                .stores(stores)
+                .stores(storeDtos)
                 .build();
     }
 }

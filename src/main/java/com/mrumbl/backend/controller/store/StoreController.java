@@ -2,7 +2,7 @@ package com.mrumbl.backend.controller.store;
 
 import com.mrumbl.backend.common.Response;
 import com.mrumbl.backend.controller.store.dto.StoreListResponse;
-import com.mrumbl.backend.controller.store.dto.GetStoreResDto;
+import com.mrumbl.backend.controller.store.dto.StoreDetailResponse;
 import com.mrumbl.backend.service.store.StoreService;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -23,31 +23,26 @@ import java.math.BigDecimal;
 public class StoreController {
     private final StoreService storeService;
 
-    // TODO - param 없을 경우 전체조회 가능하도록 수정
-    // TODO - 반환값에 x,y 좌표 추가
     @GetMapping
     public Response<StoreListResponse> searchStores(@NotBlank(message = "keyword must not be blank")
                                                         String keyword){
-        keyword = keyword.trim();
-        StoreListResponse response = storeService.searchStores(keyword);
-        return Response.ok(response);
+        return Response.ok(storeService.searchStores(keyword));
     }
 
     @GetMapping("/{storeId}")
-    public Response<GetStoreResDto> getStore(@PathVariable @Positive Long storeId){
-        GetStoreResDto response = storeService.getStore(storeId);
-        return Response.ok(response);
+    public Response<StoreDetailResponse> getStore(@PathVariable @Positive Long storeId){
+        return Response.ok(storeService.getStore(storeId));
     }
 
     @GetMapping("/nearby")
-    public Response<StoreListResponse> getStoreNearby(@RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") Double x,
-                                                      @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") Double y,
-                                                      @RequestParam @Positive Integer r){
-        BigDecimal xCoordinate = BigDecimal.valueOf(x);
-        BigDecimal yCoordinate = BigDecimal.valueOf(y);
-        
-        StoreListResponse response = storeService.getStoreNearby(xCoordinate, yCoordinate, r);
-        return Response.ok(response);
+    public Response<StoreListResponse> getNearbyStores(
+            @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
+            @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
+            @RequestParam @Positive Integer radius){
+        return Response.ok(storeService.getNearbyStores(
+                BigDecimal.valueOf(longitude), 
+                BigDecimal.valueOf(latitude), 
+                radius));
     }
 
 }

@@ -15,7 +15,7 @@ public class StoreValidator {
     private final StoreRepository storeRepository;
 
     public Store checkAndReturnStore(Long storeId){
-        return storeRepository.findById(storeId)
+        return storeRepository.findByIdAndIsActiveIsTrue(storeId)
                 .orElseThrow(() -> {
                     log.warn("Store not found. storeId={}", storeId);
                     return new BusinessException(StoreErrorCode.STORE_NOT_FOUND);

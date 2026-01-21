@@ -44,3 +44,8 @@ jwt:
   access_token_expiration: 3600000   # 1 hour (ms)
   refresh_token_expiration: 1209600000 # 14 days (ms)
 
+logging:
+  level:
+    com.mrumbl.backend.service: DEBUG  # Service 레이어의 로그 레벨을 DEBUG로 설정
+    com.mrumbl.backend.common.aop: DEBUG  # AOP 로그도 확인 가능하도록 설정
+

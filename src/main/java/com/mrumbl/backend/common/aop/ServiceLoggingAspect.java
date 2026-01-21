@@ -21,9 +21,9 @@ public class ServiceLoggingAspect {
         Object[] args = joinPoint.getArgs();
         String service = signature.getDeclaringType().getSimpleName();
 
-        // Service는 debug 레벨로 진입 로그만 출력 (args는 마스킹 처리)
+        // Service는 info 레벨로 진입 로그 출력 (args는 마스킹 처리)
         Object maskedArgs = args.length > 0 ? MaskingUtil.mask(args) : args;
-        log.debug("[{} provoked.] {} args={}", service, method, maskedArgs);
+        log.info("[{} provoked.] {} args={}", service, method, maskedArgs);
 
         try{
             Object result = joinPoint.proceed();

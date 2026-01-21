@@ -8,5 +8,5 @@ import java.util.List;
 @Getter
 @Builder
 public class StoreListResponse {
-    private List<StoreSummaryDto> stores;
+    private List<StoreInformationDto> stores;
 }

@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class StoreSummaryDto {
+public class StoreDetailResponse {
     private Long storeId;
     private String storeName;
     private StoreAddressDto storeAddress;
     private boolean isOpenNow;
-    private CoordinateDto coordinates;
+    private StoreBusinessHourDto storeBusinessHour;
 }

@@ -6,25 +6,18 @@ import com.mrumbl.backend.domain.Store;
 import java.time.LocalTime;
 
 /**
- * Store 엔티티를 DTO로 변환하는 Mapper 클래스
+ * Store Entity <-> DTO
  */
 public class StoreMapper {
 
-    /**
-     * StoreSummaryDto 생성 (좌표 O)
-     * 
-     * @param store 변환할 Store 엔티티
-     * @param includeCoordinates 좌표 포함 여부
-     * @return StoreSummaryDto
-     */
-    public static StoreSummaryDto toStoreSummaryDto(Store store, boolean includeCoordinates) {
-        StoreSummaryDto.StoreSummaryDtoBuilder builder = StoreSummaryDto.builder()
+    public static StoreInformationDto toStoreInformationDto(Store store) {
+        StoreInformationDto.StoreInformationDtoBuilder builder = StoreInformationDto.builder()
                 .storeId(store.getId())
                 .storeName(store.getStoreName())
                 .storeAddress(toStoreAddressDto(store))
                 .isOpenNow(isOpenNow(store.getOpenTime(), store.getCloseTime()));
 
-        if (includeCoordinates && store.getXCoordinate() != null && store.getYCoordinate() != null) {
+        if (store.getXCoordinate() != null && store.getYCoordinate() != null) {
             builder.coordinates(CoordinateDto.builder()
                     .longitude(store.getXCoordinate())
                     .latitude(store.getYCoordinate())
@@ -33,18 +26,8 @@ public class StoreMapper {
         return builder.build();
     }
 
-    /**
-     * StoreSummaryDto 생성 (좌표 X)
-     */
-    public static StoreSummaryDto toStoreSummaryDto(Store store) {
-        return toStoreSummaryDto(store, false);
-    }
-
-    /**
-     * GetStoreResDto 생성
-     */
-    public static GetStoreResDto toGetStoreResDto(Store store) {
-        return GetStoreResDto.builder()
+    public static StoreDetailResponse toStoreDetailResponse(Store store) {
+        return StoreDetailResponse.builder()
                 .storeId(store.getId())
                 .storeName(store.getStoreName())
                 .storeAddress(toStoreAddressDto(store))
@@ -56,9 +39,6 @@ public class StoreMapper {
                 .build();
     }
 
-    /**
-     * StoreAddressDto 생성
-     */
     private static StoreAddressDto toStoreAddressDto(Store store) {
         return StoreAddressDto.builder()
                 .address(store.getAddress())
@@ -69,9 +49,21 @@ public class StoreMapper {
 
     /**
      * 현재 시간 기준 영업 여부 확인
+     * 자정을 넘어가는 영업 시간도 처리 (예: 22:00 ~ 02:00)
      */
     private static boolean isOpenNow(LocalTime openTime, LocalTime closeTime) {
+        if (openTime == null || closeTime == null) {
+            return false;
+        }
+        
         LocalTime now = LocalTime.now();
-        return now.isBefore(closeTime) && now.isAfter(openTime);
+        
+        // 자정을 넘어가는 경우 (예: 22:00 ~ 02:00)
+        if (closeTime.isBefore(openTime)) {
+            return now.isAfter(openTime) || now.isBefore(closeTime);
+        }
+        
+        // 일반적인 경우 (예: 09:00 ~ 22:00)
+        return now.isAfter(openTime) && now.isBefore(closeTime);
     }
 }
