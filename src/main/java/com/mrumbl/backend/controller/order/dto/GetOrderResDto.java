@@ -15,4 +15,5 @@ public class GetOrderResDto {
     private OrderState orderState;
     private Long orderId;
     private LocalDateTime orderedAt;
+    private String orderNo;
 }

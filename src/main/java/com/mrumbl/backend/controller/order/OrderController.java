@@ -8,6 +8,7 @@ import com.mrumbl.backend.controller.order.dto.GetOrderResDto;
 import com.mrumbl.backend.controller.order.dto.OrderResDto;
 import com.mrumbl.backend.service.order.OrderService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,7 @@ public class OrderController {
     @PostMapping
     public Response<OrderResDto> addOrder(@AuthenticationPrincipal JwtUser user,
                                           @Valid @RequestBody AddOrderReqDto reqDto) {
+        System.out.println(reqDto.toString());
         return Response.ok(orderService.addOrder(user.getEmail(), reqDto));
     }
 
@@ -35,7 +37,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public Response<GetOrderDetailResDto> getOrderDetail(@AuthenticationPrincipal JwtUser user,
-                                                         @PathVariable Long orderId){
+                                                         @PathVariable @Positive Long orderId){
         return Response.ok(orderService.getOrderDetail(user.getEmail(), orderId));
     }
 }

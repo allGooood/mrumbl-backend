@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Data
 public class AddOrderReqDto {
-    @NotEmpty(message = "products must not be empty")
+    @NotEmpty(message = "items must not be empty")
     @Valid
     private List<OrderItemDto> items;
 
