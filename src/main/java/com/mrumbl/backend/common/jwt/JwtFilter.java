@@ -36,6 +36,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     Authentication authentication = tokenManager.createAuthentication(accessToken);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        }else{
+            log.warn("Access attempt without token.");
         }
 
         filterChain.doFilter(request, response);

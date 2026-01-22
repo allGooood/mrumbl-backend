@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -46,22 +47,17 @@ public class SecurityConfig {
                                 // Swagger UI 경로 허용
 //                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 
-                                .requestMatchers(POST, "/auth/password/verify").authenticated()
-                                .requestMatchers(DELETE,"/auth/token").authenticated()
-                                .requestMatchers(POST, "/auth/refresh-token").authenticated()
+                                .requestMatchers(POST, "/api/auth/password/verify").authenticated()
+                                .requestMatchers(DELETE,"/api/auth/logout").authenticated()
+                                .requestMatchers(POST, "/api/auth/reissue").authenticated()
 
-                                .requestMatchers(PUT, "/members/password").authenticated()
-                                .requestMatchers(PUT, "/members").authenticated()
+                                .requestMatchers(PUT, "/api/members/password").authenticated()
+                                .requestMatchers(PUT, "/api/members").authenticated()
 
-                                .requestMatchers( "/carts/**").authenticated()
+                                .requestMatchers( "/api/carts/**").authenticated()
 
-                                .requestMatchers( "/orders/**").authenticated()
+                                .requestMatchers( "/api/orders/**").authenticated()
 
-                                // Test용
-                                .requestMatchers("/test/hello").authenticated()
-//                                .requestMatchers("/test/password").authenticated()
-//                                .requestMatchers(GET, "/test/members").authenticated()
-                                .requestMatchers(PUT, "/test/members").authenticated()
                                 .anyRequest().permitAll()
                 );
 
