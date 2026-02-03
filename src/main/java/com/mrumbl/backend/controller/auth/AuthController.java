@@ -36,10 +36,10 @@ public class AuthController {
     }
 
     @DeleteMapping("/logout")
-    public Response<Void> logout(@RequestParam String email,
+    public Response<Void> logout(@AuthenticationPrincipal JwtUser user,
                                          HttpServletResponse response){
         // 1. Service에서 Redis의 RefreshToken 삭제
-        authService.logout(email);
+        authService.logout(user.getEmail());
 
         // 2. Cookie value="", maxAge(0) 으로 설정해서 클라이언트 전달
         ResponseCookie cookie = cookieManager.createExpiredCookie();

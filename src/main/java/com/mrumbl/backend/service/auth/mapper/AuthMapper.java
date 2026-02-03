@@ -17,6 +17,7 @@ public class AuthMapper {
                 .email(loginResult.getEmail())
                 .accessToken(loginResult.getAccessToken())
                 .attemptLeft(loginResult.getAttemptLeft())
+                .memberId(loginResult.getMemberId())
                 .build();
     }
 

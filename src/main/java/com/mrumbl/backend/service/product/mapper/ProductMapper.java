@@ -45,6 +45,7 @@ public class ProductMapper {
                 .imageUrl(cookie.getImageUrl())
                 .cookieCalorie(cookie.getCookieCalorie())
                 .additionalPrice(PriceConverter.centsToDollars(cookie.getAdditionalPrice()))
+                .description(cookie.getDescription())
                 .build();
     }
 }

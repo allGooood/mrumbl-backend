@@ -79,6 +79,7 @@ public class AuthService {
                 .refreshToken(tokens != null ? tokens.getRefreshToken() : null)
                 .attemptLeft(attemptLeft)
                 .email(memberFound.getEmail())
+
                 .build();
     }
 

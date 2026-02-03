@@ -10,4 +10,5 @@ public class LoginResultInternal {
     private String refreshToken;
     private int attemptLeft;
     private String email;
+    private Long memberId;
 }

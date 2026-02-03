@@ -26,4 +26,7 @@ public class ProductCookie extends BaseEntity {
 
     @Column(columnDefinition = "TINYINT(1)")
     private Boolean inUse;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

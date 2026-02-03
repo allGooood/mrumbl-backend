@@ -13,4 +13,5 @@ public class CookieProductsResponse {
     private String imageUrl;
     private Integer cookieCalorie;
     private BigDecimal additionalPrice; // 달러 단위 (DB는 센트로 저장)
+    private String description;
 }
