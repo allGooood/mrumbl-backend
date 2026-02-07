@@ -7,6 +7,7 @@ import com.mrumbl.backend.controller.product.dto.StoreProductsResponse;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductCookie;
 import com.mrumbl.backend.domain.ProductStock;
+import com.mrumbl.backend.service.S3Service;
 
 /**
  * Product Entity <-> DTO
@@ -21,7 +22,8 @@ public class ProductMapper {
                 .discountRate(product.getDiscountRate())
                 .isSoldOut(stock.getIsSoldOut())
                 .productType(product.getProductType().name())
-                .imageUrl(product.getImageUrl())
+//                .imageUrl(product.getImageUrl())
+                .imageUrl(S3Service.completeImageUrl(product.getImageUrl()))
                 .requiredItemCount(product.getRequiredItemCount())
                 .build();
     }
@@ -31,10 +33,13 @@ public class ProductMapper {
                 .productId(product.getId())
                 .productName(product.getProductName())
                 .unitAmount(product.getUnitAmount())
+                .discountRate(product.getDiscountRate())
                 .description(product.getDescription())
                 .stock(stock.getStockQuantity())
-                .imageUrl(product.getImageUrl())
-                .discountRate(product.getDiscountRate())
+                .productType(product.getProductType().name())
+//                .imageUrl(product.getImageUrl())
+                .imageUrl(S3Service.completeImageUrl(product.getImageUrl()))
+                .requiredItemCount(product.getRequiredItemCount())
                 .build();
     }
 
@@ -42,7 +47,8 @@ public class ProductMapper {
         return CookieProductsResponse.builder()
                 .cookieId(cookie.getId())
                 .cookieName(cookie.getCookieName())
-                .imageUrl(cookie.getImageUrl())
+//                .imageUrl(cookie.getImageUrl())
+                .imageUrl(S3Service.completeImageUrl(cookie.getImageUrl()))
                 .cookieCalorie(cookie.getCookieCalorie())
                 .additionalPrice(PriceConverter.centsToDollars(cookie.getAdditionalPrice()))
                 .description(cookie.getDescription())

@@ -45,6 +45,10 @@ public class S3Service {
         );
         return presignedRequest.url().toString();
     }
+
+    public static String completeImageUrl(String path){
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", "mrumbl-bucket", "ap-northeast-2", path);
+    }
 }
 
 

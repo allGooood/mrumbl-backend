@@ -15,4 +15,6 @@ public class ProductDetailResponse {
     private Integer stock;
     private String imageUrl;
     private BigDecimal discountRate;
+    private String productType;
+    private Integer requiredItemCount;
 }

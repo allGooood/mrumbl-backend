@@ -8,4 +8,5 @@ import java.util.List;
 public interface StoreRepositoryCustom {
     List<Store> searchByKeyword(String keyword);
     List<Store> findNearbyStores(BigDecimal x, BigDecimal y, Integer r);
+    List<Store> findAllStoresOrderedByDistanceFromDefaultStore();
 }

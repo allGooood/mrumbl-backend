@@ -51,4 +51,42 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom {
                 .orderBy(distance.asc())
                 .fetch();
     }
+
+    @Override
+    public List<Store> findAllStoresOrderedByDistanceFromDefaultStore() {
+        QStore store = QStore.store;
+        
+        // 기본 매장(isDefaultStore = true) 찾기
+        Store defaultStore = jpaQueryFactory
+                .select(store)
+                .from(store)
+                .where(store.isActive.eq(true)
+                        .and(store.isDefaultStore.eq(true)))
+                .fetchFirst();
+        
+        // 기본 매장이 없는 경우 전체 활성 매장 반환
+        if (defaultStore == null) {
+            return jpaQueryFactory
+                    .select(store)
+                    .from(store)
+                    .where(store.isActive.eq(true))
+                    .orderBy(store.storeName.asc())
+                    .fetch();
+        }
+        
+        // 기본 매장의 좌표를 기준으로 거리 계산
+        NumberExpression<BigDecimal> distance = Expressions.numberTemplate(
+                BigDecimal.class,
+                "ST_Distance_Sphere(POINT({0}, {1}), POINT({2}, {3}))",
+                defaultStore.getXCoordinate(), defaultStore.getYCoordinate(),
+                store.xCoordinate, store.yCoordinate
+        );
+        
+        return jpaQueryFactory
+                .select(store)
+                .from(store)
+                .where(store.isActive.eq(true))
+                .orderBy(distance.asc())
+                .fetch();
+    }
 }

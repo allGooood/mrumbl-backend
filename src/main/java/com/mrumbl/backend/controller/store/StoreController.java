@@ -36,12 +36,13 @@ public class StoreController {
 
     @GetMapping("/nearby")
     public Response<StoreListResponse> getNearbyStores(
-            @RequestParam @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
-            @RequestParam @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
-            @RequestParam @Positive Integer radius){
+            @RequestParam(required = false) @DecimalMin("-180.0") @DecimalMax("180.0") Double longitude,
+            @RequestParam(required = false) @DecimalMin("-90.0") @DecimalMax("90.0") Double latitude,
+            @RequestParam(required = false) @Positive Integer radius){
+
         return Response.ok(storeService.getNearbyStores(
-                BigDecimal.valueOf(longitude), 
-                BigDecimal.valueOf(latitude), 
+                longitude != null ? BigDecimal.valueOf(longitude) : null,
+                latitude != null ? BigDecimal.valueOf(latitude) : null,
                 radius));
     }
 

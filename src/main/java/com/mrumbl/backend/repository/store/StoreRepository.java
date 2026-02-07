@@ -23,5 +23,6 @@ public interface StoreRepository extends JpaRepository<Store, Long>, StoreReposi
 
     Optional<Store> findByIdAndIsActiveIsTrue(Long storeId);
     boolean existsByIdAndIsActiveIsTrue(Long storeId);
+    List<Store> findAllByIsActiveIsTrue();
 
 }

@@ -99,6 +99,7 @@ public class CartService {
             cartId = cartFound.getCartId();
             productId = cartFound.getProductId();
             storeId = cartFound.getStoreId();
+            quantity = cartFound.getQuantity() + reqDto.getQuantity();
 
             log.info("Updating existing cart. email={}, cartId={}, productId={}, storeId={}, quantity={}",
                     email, cartId, productId, storeId, quantity);

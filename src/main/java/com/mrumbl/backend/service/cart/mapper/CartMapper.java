@@ -6,6 +6,7 @@ import com.mrumbl.backend.domain.ProductStock;
 import com.mrumbl.backend.domain.redis.RedisCart;
 import com.mrumbl.backend.repository.product.ProductRepository;
 import com.mrumbl.backend.repository.product.ProductStockRepository;
+import com.mrumbl.backend.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,7 @@ public class CartMapper {
                 .productName(product.getProductName())
                 .unitAmount(unitAmount)
                 .productAmount(productAmount)
-                .imageUrl(product.getImageUrl())
+                .imageUrl(S3Service.completeImageUrl(product.getImageUrl()))
                 .isSoldOut(isSoldOut)
                 .requiredItemCount(product.getRequiredItemCount())
                 .quantity(cart.getQuantity())

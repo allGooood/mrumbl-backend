@@ -48,8 +48,16 @@ public class StoreService {
 
     @Transactional(readOnly = true)
     public StoreListResponse getNearbyStores(BigDecimal longitude, BigDecimal latitude, Integer radius){
-        List<Store> storesFound = storeRepository.findNearbyStores(longitude, latitude, radius);
-        log.info("Found {} stores within {}m radius", storesFound.size(), radius);
+        List<Store> storesFound;
+        
+        // 위치 정보가 없는 경우 기본 매장 기준 거리 순으로 조회
+        if (longitude == null || latitude == null || radius == null) {
+            storesFound = storeRepository.findAllStoresOrderedByDistanceFromDefaultStore();
+            log.info("Found {} stores ordered by distance from default store (location not provided)", storesFound.size());
+        } else {
+            storesFound = storeRepository.findNearbyStores(longitude, latitude, radius);
+            log.info("Found {} stores within {}m radius", storesFound.size(), radius);
+        }
 
         List<StoreInformationDto> storeDtos = storesFound.stream()
                 .map(StoreMapper::toStoreInformationDto)
