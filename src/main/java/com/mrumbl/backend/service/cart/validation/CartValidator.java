@@ -60,4 +60,15 @@ public class CartValidator {
     public void checkCartOwnershipValidation(Set<String> cartIdsFound, String cartIdRequested){
         checkCartOwnershipValidation(cartIdsFound, Collections.singleton(cartIdRequested));
     }
+
+    /**
+     * 한 사용자는 한 상점의 상품만 카트에 담을 수 있음.
+     * 이미 다른 상점 상품이 담겨 있으면 예외.
+     */
+    public void checkStoreIdMatchesCartKey(RedisCartKey cartKey, Long requestStoreId) {
+        if (cartKey.getStoreId() != null && !cartKey.getStoreId().equals(requestStoreId)) {
+            log.warn("Cart store mismatch. cartKey.storeId={}, requestStoreId={}", cartKey.getStoreId(), requestStoreId);
+            throw new BusinessException(CartErrorCode.CART_STORE_MISMATCH);
+        }
+    }
 }

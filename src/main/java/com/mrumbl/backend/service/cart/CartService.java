@@ -1,5 +1,6 @@
 package com.mrumbl.backend.service.cart;
 
+import com.mrumbl.backend.common.enumeration.ProductType;
 import com.mrumbl.backend.common.exception.BusinessException;
 import com.mrumbl.backend.common.exception.error_codes.CartErrorCode;
 import com.mrumbl.backend.controller.cart.dto.*;
@@ -26,7 +27,6 @@ import static com.mrumbl.backend.common.util.RandomManager.createCartKey;
 public class CartService {
     private final RedisCartKeyRepository redisCartKeyRepository;
     private final RedisCartRepository redisCartRepository;
-//    private final RedisCartRepositoryCustom redisCartRepositoryCustom;
 
     private final MemberValidator memberValidator;
     private final CartValidator cartValidator;
@@ -40,6 +40,10 @@ public class CartService {
         memberValidator.checkExistingMember(email);
 
         RedisCartKey cartKeyFound = findCartKeyOrCreateEmpty(email);
+        
+//        if (cartKeyFound.getStoreId() == null || !cartKeyFound.getStoreId().equals(storeId)) {
+//            return List.of();
+//        }
         List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
 
         return cartsFound.stream()
@@ -84,6 +88,7 @@ public class CartService {
         cartValidator.checkQuantityValidation(quantity);
 
         RedisCartKey cartKeyFound = findCartKeyOrCreateEmpty(email);
+        cartValidator.checkStoreIdMatchesCartKey(cartKeyFound, reqDto.getStoreId());
 
         // 1. 기존 카트 있는지 조회
         Optional<RedisCart> cartOptional = findByStoreIdAndProductId(cartKeyFound.getCartIds(), reqDto.getStoreId(), reqDto.getProductId());
@@ -92,7 +97,9 @@ public class CartService {
         Long productId;
         Long storeId;
 
-        if (cartOptional.isPresent()) {
+        if (cartOptional.isPresent()
+                && !reqDto.getProductType().equals(ProductType.COOKIE_BOX.name())) {
+
             // 2. 기존 카트 UPDATE
             RedisCart cartFound = cartOptional.get();
 
@@ -111,9 +118,12 @@ public class CartService {
             storeId = reqDto.getStoreId();
 
             cartKeyFound.getCartIds().add(cartId);
+            if (cartKeyFound.getStoreId() == null) {
+                cartKeyFound.setStoreId(reqDto.getStoreId());
+            }
             redisCartKeyRepository.save(cartKeyFound);
 
-            log.info("Creating new cart. email={}, cartId={}, productId={}, storeId={}, quantity={}", 
+            log.info("Creating new cart. email={}, cartId={}, productId={}, storeId={}, quantity={}",
                     email, cartId, productId, storeId, quantity);
         }
 
@@ -159,6 +169,9 @@ public class CartService {
         redisCartRepository.deleteAllById(cartIds);
 
         cartIdsFound.removeAll(cartIds);
+        if (cartIdsFound.isEmpty()) {
+            cartKeyFound.setStoreId(null);
+        }
         redisCartKeyRepository.save(cartKeyFound);
     }
 

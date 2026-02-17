@@ -1,5 +1,6 @@
 package com.mrumbl.backend.service.cart.mapper;
 
+import com.mrumbl.backend.common.enumeration.ProductType;
 import com.mrumbl.backend.controller.cart.dto.GetCartResponse;
 import com.mrumbl.backend.domain.Product;
 import com.mrumbl.backend.domain.ProductStock;
@@ -26,10 +27,28 @@ public class CartMapper {
                 .orElse(null);
         ProductStock productStock = productStockRepository.findByStoreIdAndProductIdWithFetchJoin(cart.getStoreId(), cart.getProductId())
                 .orElse(null);
-        Boolean isSoldOut = (product == null || productStock == null) ? true : productStock.getIsSoldOut();
+        Boolean isSoldOut = product == null || productStock == null || productStock.getIsSoldOut();
 
-        // TODO - Extra Price 붙은 경우
-        BigDecimal unitAmount = BigDecimal.valueOf(product.getUnitAmount());
+        if (product == null) {
+            return GetCartResponse.builder()
+                    .cartId(cart.getCartId())
+                    .productId(cart.getProductId())
+                    .productName(null)
+                    .unitAmount(BigDecimal.ZERO)
+                    .productAmount(BigDecimal.ZERO)
+                    .imageUrl(null)
+                    .isSoldOut(true)
+                    .requiredItemCount(null)
+                    .quantity(cart.getQuantity())
+                    .options(cookieOptionMapper.toCookieOptionDetailResponse(cart.getOptions()))
+                    .build();
+        }
+
+        int baseCents = product.getUnitAmount();
+        int optionsExtraCents = product.getProductType() == ProductType.COOKIE_BOX
+                ? cookieOptionMapper.calculateOptionsExtraCents(cart.getOptions())
+                : 0;
+        BigDecimal unitAmount = BigDecimal.valueOf(baseCents + optionsExtraCents);
         BigDecimal productAmount = unitAmount.multiply(BigDecimal.valueOf(cart.getQuantity()));
 
         return GetCartResponse.builder()

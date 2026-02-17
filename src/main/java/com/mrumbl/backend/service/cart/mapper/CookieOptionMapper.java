@@ -49,4 +49,18 @@ public class CookieOptionMapper {
                 })
                 .toList();
     }
+
+    public int calculateOptionsExtraCents(List<RedisCart.CookieOption> options) {
+        if (CollectionUtils.isEmpty(options)) {
+            return 0;
+        }
+        int total = 0;
+        for (RedisCart.CookieOption opt : options) {
+            ProductCookie cookie = productCookieRepository.findById(opt.getCookieId()).orElse(null);
+            if (cookie != null && cookie.getAdditionalPrice() != null) {
+                total += cookie.getAdditionalPrice() * opt.getQuantity();
+            }
+        }
+        return total;
+    }
 }

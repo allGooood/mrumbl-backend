@@ -21,6 +21,9 @@ public class AddCartRequest {
     @Positive(message = "quantity must be positive")
     private Integer quantity;
 
+    @NotNull
+    private String productType;
+
     @Valid
     private List<CookieOptionRequest> options;
 }
