@@ -1,4 +1,4 @@
-package com.mrumbl.backend.service.cart;
+package com.mrumbl.backend.service.cart.v2;
 
 import com.mrumbl.backend.common.enumeration.ProductType;
 import com.mrumbl.backend.common.exception.BusinessException;
@@ -20,11 +20,10 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 
 import static com.mrumbl.backend.common.util.RandomManager.createCartKey;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CartService {
+public class CartServiceV2 {
     private final RedisCartKeyRepository redisCartKeyRepository;
     private final RedisCartRepository redisCartRepository;
 
@@ -40,10 +39,7 @@ public class CartService {
         memberValidator.checkExistingMember(email);
 
         RedisCartKey cartKeyFound = findCartKeyOrCreateEmpty(email);
-        
-//        if (cartKeyFound.getStoreId() == null || !cartKeyFound.getStoreId().equals(storeId)) {
-//            return List.of();
-//        }
+
         List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
 
         return GetCartResponse.builder()
@@ -54,7 +50,7 @@ public class CartService {
                 .build();
     }
 
-    public CartCommonResponse putCart(String email, PutCartRequest reqDto) {
+    public GetCartResponse putCart(String email, PutCartRequest reqDto) {
         log.info("Updating cart. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), reqDto.getQuantity());
 
         Integer quantity = reqDto.getQuantity();
@@ -80,12 +76,18 @@ public class CartService {
 
         log.info("Cart updated successfully. email={}, cartId={}, quantity={}", email, reqDto.getCartId(), quantity);
 
-        return CartCommonResponse.builder()
-                .cartIds(Collections.singleton(reqDto.getCartId()))
+        // 3. 업데이트된 카트 전체 조회하여 반환
+        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
+
+        return GetCartResponse.builder()
+                .storeId(cartKeyFound.getStoreId())
+                .items(cartsFound.stream()
+                        .map(cartMapper::toGetCartResponse)
+                        .toList())
                 .build();
     }
 
-    public CartCommonResponse addCarts(String email, AddCartRequest reqDto) {
+    public GetCartResponse addCarts(String email, AddCartRequest reqDto) {
         Integer quantity = reqDto.getQuantity();
 
         cartValidator.checkQuantityValidation(quantity);
@@ -140,12 +142,18 @@ public class CartService {
 
         redisCartRepository.save(cartEntity);
 
-        return CartCommonResponse.builder()
-                .cartIds(Collections.singleton(cartId))
+        // 4. 추가된 카트 전체 조회하여 반환
+        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(cartKeyFound.getCartIds());
+
+        return GetCartResponse.builder()
+                .storeId(cartKeyFound.getStoreId())
+                .items(cartsFound.stream()
+                        .map(cartMapper::toGetCartResponse)
+                        .toList())
                 .build();
     }
 
-    public CartCommonResponse deleteCarts(String email, DeleteCartRequest reqDto){
+    public GetCartResponse deleteCarts(String email, DeleteCartRequest reqDto){
         log.info("Deleting cart. email={}, cartIds={}", email, reqDto.getCartIds());
 
         memberValidator.checkExistingMember(email);
@@ -153,8 +161,15 @@ public class CartService {
 
         log.info("Cart deleted successfully. email={}, cartIds={}", email, reqDto.getCartIds());
 
-        return CartCommonResponse.builder()
-                .cartIds(reqDto.getCartIds())
+        // 삭제 후 남은 카트 전체 조회하여 반환
+        RedisCartKey updatedCartKey = findCartKeyOrCreateEmpty(email);
+        List<RedisCart> cartsFound = cartValidator.checkAndReturnExistingCartAll(updatedCartKey.getCartIds());
+
+        return GetCartResponse.builder()
+                .storeId(updatedCartKey.getStoreId())
+                .items(cartsFound.stream()
+                        .map(cartMapper::toGetCartResponse)
+                        .toList())
                 .build();
     }
 

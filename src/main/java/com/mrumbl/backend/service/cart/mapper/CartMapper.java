@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class CartMapper {
 
     private final CookieOptionMapper cookieOptionMapper;
 
-    public GetCartResponse toGetCartResponse(RedisCart cart){
+    public GetCartResponse.CartProduct toGetCartResponse(RedisCart cart){
         // isSoldOut
         Product product = productRepository.findByIdAndInUse(cart.getProductId(), true)
                 .orElse(null);
@@ -30,7 +31,7 @@ public class CartMapper {
         Boolean isSoldOut = product == null || productStock == null || productStock.getIsSoldOut();
 
         if (product == null) {
-            return GetCartResponse.builder()
+            return GetCartResponse.CartProduct.builder()
                     .cartId(cart.getCartId())
                     .productId(cart.getProductId())
                     .productName(null)
@@ -51,7 +52,7 @@ public class CartMapper {
         BigDecimal unitAmount = BigDecimal.valueOf(baseCents + optionsExtraCents);
         BigDecimal productAmount = unitAmount.multiply(BigDecimal.valueOf(cart.getQuantity()));
 
-        return GetCartResponse.builder()
+        return GetCartResponse.CartProduct.builder()
                 .cartId(cart.getCartId())
                 .productId(cart.getProductId())
                 .productName(product.getProductName())

@@ -9,16 +9,23 @@ import java.util.List;
 @Builder
 @Getter
 public class GetCartResponse {
-    private String cartId;
+    private Long storeId;
+    private List<CartProduct> items;
 
-    private Long productId;
-    private String productName;
-    private BigDecimal unitAmount;
-    private BigDecimal productAmount;
-    private String imageUrl;
-    private Boolean isSoldOut; //TODO - 응답 실제 필드명 확인
-    private Integer requiredItemCount;
+    @Builder
+    @Getter
+    public static class CartProduct{
+        private String cartId;
 
-    private Integer quantity;
-    private List<CookieOptionDetailResponse> options;
+        private Long productId;
+        private String productName;
+        private BigDecimal unitAmount;
+        private BigDecimal productAmount;
+        private String imageUrl;
+        private Boolean isSoldOut; //TODO - 응답 실제 필드명 확인
+        private Integer requiredItemCount;
+
+        private Integer quantity;
+        private List<CookieOptionDetailResponse> options;
+    }
 }
