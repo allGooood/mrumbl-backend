@@ -35,6 +35,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 .errorCode(CommonErrorCode.FORBIDDEN.getCode())
                 .message(CommonErrorCode.FORBIDDEN.getMessage())
                 .build();
+
         String responseBody = objectMapper.writeValueAsString(body);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

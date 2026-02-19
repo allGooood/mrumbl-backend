@@ -48,9 +48,6 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests((authorizeRequests) ->
                         authorizeRequests
-                                // Swagger UI 경로 허용
-//                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                                
                                 .requestMatchers(POST, "/api/auth/password/verify").authenticated()
                                 .requestMatchers(DELETE,"/api/auth/logout").authenticated()
                                 .requestMatchers(POST, "/api/auth/reissue").authenticated()
@@ -58,7 +55,7 @@ public class SecurityConfig {
                                 .requestMatchers(PUT, "/api/members/password").authenticated()
                                 .requestMatchers(PUT, "/api/members").authenticated()
 
-                                .requestMatchers( "/api/carts/**").authenticated()
+                                .requestMatchers("/api/v2/carts/**", "/api/carts/**").authenticated()
 
                                 .requestMatchers( "/api/orders/**").authenticated()
 

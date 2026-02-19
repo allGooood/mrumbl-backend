@@ -31,20 +31,13 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         log.error("Request Uri : {}", request.getRequestURI());
 
-        BusinessException businessException = (BusinessException) request.getAttribute("authError");
+        ErrorResponse body = ErrorResponse.builder()
+                .success(false)
+                .errorCode(CommonErrorCode.UNAUTHORIZED.getCode())
+                .message(CommonErrorCode.UNAUTHORIZED.getMessage())
+                .build();
 
-        ErrorResponse.ErrorResponseBuilder builder = ErrorResponse.builder()
-                .success(false);
-
-        if(businessException != null){
-            builder.errorCode(businessException.getErrorCode().getCode())
-                    .message(businessException.getErrorCode().getMessage());
-        } else{
-          builder.errorCode(CommonErrorCode.UNAUTHORIZED.getCode())
-                  .message(CommonErrorCode.UNAUTHORIZED.getMessage());
-        }
-
-        String responseBody = objectMapper.writeValueAsString(builder.build());
+        String responseBody = objectMapper.writeValueAsString(body);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
