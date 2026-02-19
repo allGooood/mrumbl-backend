@@ -23,7 +23,6 @@ public class AuthMapper {
 
     public static ReissueResponse toReissueResponse(JwtToken tokens) {
         return ReissueResponse.builder()
-                .email(tokens.getEmail())
                 .accessToken(tokens.getAccessToken())
                 .build();
     }

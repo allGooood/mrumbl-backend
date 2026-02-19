@@ -50,7 +50,6 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(POST, "/api/auth/password/verify").authenticated()
                                 .requestMatchers(DELETE,"/api/auth/logout").authenticated()
-                                .requestMatchers(POST, "/api/auth/reissue").authenticated()
 
                                 .requestMatchers(PUT, "/api/members/password").authenticated()
                                 .requestMatchers(PUT, "/api/members").authenticated()

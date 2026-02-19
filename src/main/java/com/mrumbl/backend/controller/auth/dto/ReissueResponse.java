@@ -6,6 +6,5 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ReissueResponse {
-    private String email;
     private String accessToken;
 }

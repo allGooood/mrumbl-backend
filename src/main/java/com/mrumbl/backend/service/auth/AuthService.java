@@ -89,11 +89,13 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public JwtToken reissue(String email, String refreshToken) {
+    public JwtToken reissue(String refreshToken) {
         // 1. token 유효성 검증 (유효하지 않으면 BusinessException 발생)
         if(!tokenManager.isValidateToken(refreshToken)){
             throw new BusinessException(AuthErrorCode.INVALID_AUTH_TOKEN);
         }
+
+        String email = tokenManager.getUserEmail(refreshToken);
 
         // 2. redis에서 토큰 조회
         redisTokenRepository.findById(email)

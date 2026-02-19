@@ -7,6 +7,7 @@ import com.mrumbl.backend.controller.auth.dto.*;
 import com.mrumbl.backend.service.auth.AuthService;
 import com.mrumbl.backend.common.util.CookieManager;
 import com.mrumbl.backend.service.auth.mapper.AuthMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +50,9 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public Response<ReissueResponse> reissue(@RequestBody ReissueRequest reqDto,
+    public Response<ReissueResponse> reissue(@CookieValue(name = "refreshToken") String refreshToken,
                                              HttpServletResponse response){
-        JwtToken tokens = authService.reissue(reqDto.getEmail(), reqDto.getRefreshToken());
+        JwtToken tokens = authService.reissue(refreshToken);
 
         ResponseCookie cookie = cookieManager.createValidCookie(tokens.getRefreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

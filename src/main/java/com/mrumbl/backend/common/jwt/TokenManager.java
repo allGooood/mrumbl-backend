@@ -94,12 +94,17 @@ public class TokenManager {
         return new UsernamePasswordAuthenticationToken(principal, accessToken, authorities);
     }
 
-    private Claims parseClaims(String accessToken){
+    private Claims parseClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(accessToken)
+                .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public String getUserEmail(String token){
+        return parseClaims(token)
+                .getSubject();
     }
 
     private String createToken(Member member, Date issuedAt, Date expiredAt) {
